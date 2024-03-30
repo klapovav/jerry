@@ -1,0 +1,44 @@
+syntax = "proto3";
+package slave;
+
+import "clipboard.proto";
+
+message SlaveMessage{
+    oneof response{
+        ClientInfo init_info = 1;
+        Position cursor = 2; 
+        common.Clipboard clipboard_session = 3;
+        Failure no_response = 4;
+    }
+}
+message Failure{
+  string Reason = 1;
+}
+
+message ClientInfo {
+  
+    int32 Width = 1;
+    int32 Height = 2;
+    
+    Position Cursor = 6;
+    string Password = 7;
+  
+    UUID Guid = 5;
+    string Name = 3;
+    OS System = 4;
+
+    enum OS{
+      WINDOWS = 0;
+      LINUX = 1;
+      MAC = 2;
+    }
+  
+    message UUID { // universally unique identifier (UUID) is a 128-bit number used to identify information in computer systems. The term globally unique identifier (GUID) is also used, typically in software created by Microsoft.[1]
+      string value = 1;
+    }
+}
+
+message Position{
+    int32 x = 1;
+    int32 y = 2;
+}

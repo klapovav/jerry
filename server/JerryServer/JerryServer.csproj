@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon />
+    <StartupObject />
+	<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+	<TargetFramework>net7.0-windows</TargetFramework>
+	<Configurations>Debug;Release;DebugLoopback</Configurations>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NHotkey" Version="2.1.0" />
+    <PackageReference Include="NHotkey.Wpf" Version="2.1.0" />
+    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jerry\Jerry.csproj" />
+    <ProjectReference Include="..\Serialization\Serialization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="img\jerry_tray.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <Import Project="..\WinApi\WinApi.projitems" Label="Shared" />
+
+</Project>

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package common;
+
+message Clipboard {
+  string message = 1;
+  Format format = 2;
+
+  enum Format{
+    TEXT = 0;
+    FILE = 1;
+  }
+}

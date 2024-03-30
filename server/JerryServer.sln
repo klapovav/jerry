@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JerryServer", "JerryServer\JerryServer.csproj", "{79F4048D-F908-494E-B602-3CC2C7191BEC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jerry", "Jerry\Jerry.csproj", "{4284C535-913B-4452-AA11-CFF3ADCC6954}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "Serialization\Serialization.csproj", "{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WinApi", "WinApi\WinApi.shproj", "{FD9015A2-1F94-4321-A6F6-2C371D06978E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugLoopback|Any CPU = DebugLoopback|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.DebugLoopback|Any CPU.ActiveCfg = DebugLoopback|Any CPU
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.DebugLoopback|Any CPU.Build.0 = DebugLoopback|Any CPU
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79F4048D-F908-494E-B602-3CC2C7191BEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.DebugLoopback|Any CPU.ActiveCfg = DebugLoopback|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.DebugLoopback|Any CPU.Build.0 = DebugLoopback|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4284C535-913B-4452-AA11-CFF3ADCC6954}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.DebugLoopback|Any CPU.ActiveCfg = DebugLoopback|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.DebugLoopback|Any CPU.Build.0 = DebugLoopback|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF3A8B0F-5D38-4C8C-A629-CFD5F8BCC8AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {102A4E05-C3EC-4503-A815-B1C8C191DD24}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WinApi\WinApi.projitems*{79f4048d-f908-494e-b602-3cc2c7191bec}*SharedItemsImports = 5
+		WinApi\WinApi.projitems*{fd9015a2-1f94-4321-a6f6-2c371d06978e}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal
