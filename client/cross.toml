@@ -1,0 +1,10 @@
+[build]
+pre-build = ["apt update && apt upgrade -y && apt install -y protobuf-compiler"]
+
+[target.x86_64-pc-windows-gnu]
+pre-build = ["apt-get update && apt-get upgrade -y && apt-get install -y protobuf-compiler"]
+
+[target.x86_64-unknown-linux-gnu]
+pre-build = ["apt-get update && apt-get upgrade -y && apt-get install -y libx11-dev libxi-dev libxtst-dev libxdo-dev protobuf-compiler"]
+
+

@@ -1,0 +1,88 @@
+﻿syntax = "proto3";
+package master;
+
+import "clipboard.proto";
+
+message MasterMessage{
+    string rndB = 1;
+    oneof action{
+        MouseMove mouse_position = 11;
+        Keyboard keyboard = 2;
+        MouseClick mouse_click = 3;
+        MouseWheel mouse_wheel = 8;
+        common.Clipboard clipboard = 4;
+        SessionBegin start_session = 5;
+        SessionEnd end_session = 6;
+        Request request = 7;
+        Echo handshake = 9;
+        Heartbeat heartbeat = 10;
+    }
+    string rndE = 12;
+}
+
+enum Request{
+    INIT_INFO = 0;
+    MOUSE_POSITION = 1;
+    CLIPBOARD = 2;
+}
+
+enum HandshakeResult{
+    Success = 0;
+    SuccessWarning = 1;
+    Rejection = 2;
+}
+message Echo{
+    HandshakeResult result = 1;
+    string message = 2;
+}
+
+message Heartbeat {
+    bool one_way = 1;
+}
+
+
+message SessionBegin{
+    bool mouse_move_relative = 1;
+}
+message SessionEnd{}
+
+
+message Keyboard {
+    uint32 key = 1;
+    State event_type = 2;
+}
+
+message MouseMove {
+    int32 X = 1;
+    int32 Y = 2;
+}
+
+message MouseClick {
+	Button button = 1;
+	State event_type = 2;
+}
+message MouseWheel{
+    Direction scroll_direction = 1;
+    int32 amount = 2;
+}
+enum Direction {
+    SCROLL_UP = 0;
+    SCROLL_DOWN = 1;
+    SCROLL_LEFT = 2;
+    SCROLL_RIGHT = 3;
+}
+
+enum Button {
+	LEFT = 0;
+	RIGHT = 1;
+	MIDDLE = 2;
+	XBUTTON1 = 3;
+	XBUTTON2 = 4;
+}
+
+enum State{
+	PRESSED = 0;
+	RELEASED = 1;
+}
+
+  
