@@ -1,10 +1,10 @@
 ﻿using Jerry.ConfigurationManager;
+using Jerry.Controllable;
 using Jerry.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using Jerry.Controllable;
 
 namespace Jerry.LayoutExt.Screen;
 
@@ -46,7 +46,6 @@ internal class LocalLayout : IVirtualDesktopLayout
 
     public LayoutCoordinate GetIntersection(LayoutCoordinate lineSegmentStart, LayoutCoordinate lineSegmentEnd)
     {
-       
         foreach (ScreenSimple s in LocalScreens)
         {
             if (s.TryGetIntersection(lineSegmentStart, lineSegmentEnd, out var inter))

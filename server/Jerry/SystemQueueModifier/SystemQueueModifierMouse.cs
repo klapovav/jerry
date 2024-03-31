@@ -1,7 +1,6 @@
 ﻿using Jerry.Events;
 using Jerry.Hook;
 using Jerry.Hook.WinApi;
-using Master;
 using Serilog;
 
 namespace Jerry.SystemQueueModifier;
@@ -56,6 +55,7 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
             ? FilterResult.Discard
             : FilterResult.Keep;
     }
+
     private FilterResult MouseHook_OnMouseMove(MouseHookStruct mouseHookStruct)
     {
         return cursorSyncSupervisor.TryGetCursorPosition(out var fixedCursorPosition)

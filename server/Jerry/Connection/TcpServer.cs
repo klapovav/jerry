@@ -16,7 +16,7 @@ public class TcpServer : IDisposable
     private IPEndPoint IPEndPoint { get; }
 
     private readonly Gatekeeper.Gatekeeper Gatekeeper;
-    private CancellationTokenSource acceptClientConnections; 
+    private CancellationTokenSource acceptClientConnections;
     public bool IsRunning { get; private set; }
 
     public TcpServer(IClientManager virtualDesk, Settings settings)
@@ -74,7 +74,7 @@ public class TcpServer : IDisposable
             {
                 try
                 {
-                    var socket = tcpListener.AcceptSocket();     
+                    var socket = tcpListener.AcceptSocket();
                     onSocketAcceptDelegate(socket);
                 }
                 catch (InvalidOperationException) when (token.IsCancellationRequested)

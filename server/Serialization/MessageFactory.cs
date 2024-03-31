@@ -1,22 +1,19 @@
 ﻿using Common;
-using Google.Protobuf;
 using Master;
 using System;
-using System.IO;
 using System.Text;
-
 
 namespace Serialization;
 
-public  class MessageFactory
+public class MessageFactory
 {
     private readonly Random numGenerator;
+
     public MessageFactory()
     {
         numGenerator = new Random();
-        
-        
     }
+
     private string GetRandomString(int length)
     {
         var sb = new StringBuilder();
@@ -26,6 +23,7 @@ public  class MessageFactory
         }
         return sb.ToString();
     }
+
     public MasterMessage Heartbeat()
     {
         var m = new MasterMessage
@@ -38,8 +36,6 @@ public  class MessageFactory
             RndE = GetRandomString(numGenerator.Next(1, 5))
         };
         return m;
-
-       
     }
 
     public MasterMessage Request(Request dataRequest)
@@ -61,7 +57,6 @@ public  class MessageFactory
         },
         RndB = String.Empty,
         RndE = String.Empty
-
     };
 
     public MasterMessage MouseMove(int x, int y) => new()
@@ -73,9 +68,7 @@ public  class MessageFactory
         },
         RndB = String.Empty,
         RndE = String.Empty
-
     };
-
 
     public MasterMessage MouseWheel(Direction direction, int amount) => new()
     {
@@ -86,7 +79,6 @@ public  class MessageFactory
         },
         RndB = String.Empty,
         RndE = String.Empty
-
     };
 
     public static MasterMessage MouseClick(Button button, State state) => new()
@@ -130,7 +122,7 @@ public  class MessageFactory
         return m;
     }
 
-    public  MasterMessage SessionEnd()
+    public MasterMessage SessionEnd()
     {
         var m = new MasterMessage
         {

@@ -15,7 +15,7 @@ public interface IControllableComputer : IEquatable<IControllableComputer>
     public Guid ID { get; }
 
     /// <summary>
-    /// Identifies a successful connection of a controllable computer to the system. 
+    /// Identifies a successful connection of a controllable computer to the system.
     /// </summary>
     public Ticket Ticket { get; }
 
@@ -37,6 +37,7 @@ public interface IControllableComputer : IEquatable<IControllableComputer>
     bool OnDeactivate(out Common.Clipboard clipboard);
 
     void OnActivate(Common.Clipboard clipboard);
+
     void ReleaseModifiers(ModifierKeys modifiers);
 
     /// <summary>
@@ -46,6 +47,8 @@ public interface IControllableComputer : IEquatable<IControllableComputer>
     /// True if the computer is able to receive messages; otherwise, false.
     /// </returns>
     bool TrySendHeartbeat();
+
     bool IEquatable<IControllableComputer>.Equals(IControllableComputer other) => Ticket.Equals(other.Ticket);
+
     bool EqualsTicket(Ticket other) => Ticket.Equals(other);
 }

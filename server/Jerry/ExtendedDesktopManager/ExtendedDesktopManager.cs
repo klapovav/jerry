@@ -1,7 +1,6 @@
 ﻿using Jerry.Hook;
 using Jerry.Hotkey;
 using Serilog;
-using Slave;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
     /// multiple-producer,single-consumer
     /// </summary>
     private readonly IExtendedDesktopManager Implementation;
+
     private readonly BlockingCollection<Task> _jobs;
     private readonly Thread consumerThread;
 
@@ -36,7 +36,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
             Mode.Basic => new BaseDesktopManager(onActiveChanged),
             _ => new BaseDesktopManager(onActiveChanged),
         };
- 
+
         double v = 3.1;
         Log.Information("Version: {Version}", v);
         Log.Information("Mode: {Mode}", mode);
@@ -64,21 +64,19 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
                         throw t.Exception;
                     }
                 }
-                catch (Exception e )
+                catch (Exception e)
                 {
                     Log.Error("[EDM] Exception {0}", e.Message);
                     Log.Error("[EDM] Inner exception {0}", e.InnerException);
                 }
-
             }
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Log.Error("[EDM] Blocking collection disposed:  {0}", e.Message);
         }
         Log.Debug("[EDM] Message consumer completed.");
     }
-
-
 
     public void KeyGesture(HotkeyType type)
     {
@@ -90,8 +88,6 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception)
         { }
     }
-
-
 
     public void RegisterClient(ConnectedClient client)
     {
@@ -113,7 +109,6 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception) { }
     }
 
-
     public Task<IEnumerable<Guid>> GetConnectedClients()
     {
         try
@@ -126,7 +121,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
             _jobs.TryAdd(t, Timeout.Infinite);
             return tsc.Task;
         }
-        catch (Exception) { return Task.FromResult(Enumerable.Empty<Guid>()); } 
+        catch (Exception) { return Task.FromResult(Enumerable.Empty<Guid>()); }
     }
 
     public Task<bool> HearbeatAnyClientIsSuccessful()
@@ -138,7 +133,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
             {
                 tsc.SetResult(await Implementation.HearbeatAnyClientIsSuccessful());
             });
-            _jobs.TryAdd(t, Timeout.Infinite); 
+            _jobs.TryAdd(t, Timeout.Infinite);
             return tsc.Task;
         }
         catch (Exception)
@@ -222,8 +217,8 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         }
         catch (Exception) { }
     }
+
     public string CurrentVersion => Implementation.CurrentVersion;
 
     public Mode Mode { get; init; }
-
 }

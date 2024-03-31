@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace Jerry.SystemQueueModifier
 {
-
     internal abstract class SystemQueueModifierBase<T> where T : struct, System.Enum //: IModifier, ISubscriber
     {
         protected abstract IHook hook { get; }

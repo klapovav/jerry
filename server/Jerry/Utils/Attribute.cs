@@ -2,7 +2,6 @@
 
 namespace Jerry;
 
-
 [AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
 public class ImplementedBy : Attribute
 {

@@ -25,9 +25,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-using Tomlyn;
-using Tomlyn.Model;
 //--------------------------------
 using Jerry.Hotkey;
 using Serilog;
@@ -36,9 +33,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
-
+using Tomlyn;
+using Tomlyn.Model;
 
 namespace Jerry.ConfigurationManager;
 
@@ -61,7 +58,7 @@ public class AppSettings : ISettingsManager, ISettingsProvider
     {
         var def = CreateDefault();
         var result = new List<ValidationResult>();
-        if (!Validator.TryValidateObject(def, new ValidationContext(def, null, null), result, true)) 
+        if (!Validator.TryValidateObject(def, new ValidationContext(def, null, null), result, true))
         { } // UNDONE 9
         cache = def;
     }
@@ -72,7 +69,7 @@ public class AppSettings : ISettingsManager, ISettingsProvider
         var nums = Enumerable
             .Range(0, 4)
             .Select(x => randomGenerator.Next(0, 10));
-        
+
         return new Settings
         {
             Password = String.Join(String.Empty, nums),
@@ -185,7 +182,8 @@ public class Settings : ITomlMetadataProvider
     public JerryKeyGesture SwitchHome => ParseFromOrDefault(ShortcutSwitchHome, HotkeyType.SwitchToServer);
     public JerryKeyGesture SwitchMouseMove => GetDefault(HotkeyType.SwitchMouseMove);
 
-    private static JerryKeyGesture ParseFromOrDefault(Shortcut sc, HotkeyType type) =>  ParseFrom(sc, type) ?? GetDefault(type);
+    private static JerryKeyGesture ParseFromOrDefault(Shortcut sc, HotkeyType type) => ParseFrom(sc, type) ?? GetDefault(type);
+
     private static JerryKeyGesture GetDefault(HotkeyType type) => type switch
     {
         HotkeyType.SwitchDestination => new JerryKeyGesture(type, Key.N, ModifierKeys.Control | ModifierKeys.Alt),
@@ -193,6 +191,7 @@ public class Settings : ITomlMetadataProvider
         HotkeyType.SwitchMouseMove => new JerryKeyGesture(type, Key.F1, ModifierKeys.Control | ModifierKeys.Alt),
         _ => throw new NotImplementedException(),
     };
+
     private static JerryKeyGesture ParseFrom(Shortcut sc, HotkeyType type)
     {
         if (!System.Enum.TryParse(typeof(Key), sc.Key, out object key2))
@@ -227,5 +226,4 @@ public class Shortcut : ITomlMetadataProvider
     public string Key { get; set; }
 
     public TomlPropertiesMetadata PropertiesMetadata { get; set; }
-  
 }

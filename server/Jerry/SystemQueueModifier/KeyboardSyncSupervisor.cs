@@ -1,5 +1,4 @@
 ﻿using Jerry.Hook.SysGlobalState;
-using Jerry.Hook.WinApi;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -25,6 +24,7 @@ internal class KeyboardSyncSupervisor
     private string prevLogContent;
 
     private List<uint> previouslyPressed;
+
     public bool Trustworthy
     {
         get
@@ -33,6 +33,7 @@ internal class KeyboardSyncSupervisor
             return state == Reliability.Trustworthy;
         }
     }
+
     private void Update()
     {
         if (state == Reliability.Unreliable
@@ -56,14 +57,17 @@ internal class KeyboardSyncSupervisor
     {
         return Keyboard.GetKeyState((Keys)vk_code).Down;
     }
+
     public void ExpectMsgInSystemQueue()
     {
         throw new NotImplementedException();
     }
+
     public void On()
     {
         throw new NotImplementedException();
     }
+
     public bool AllKeysAreReleased()
     {
         //Querying the state of the keyboard is still not reliable

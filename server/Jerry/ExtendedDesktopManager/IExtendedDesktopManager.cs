@@ -1,6 +1,5 @@
 ﻿using Jerry.ExtendedDesktopManager;
 using Jerry.Hotkey;
-using Jerry.Connection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,11 +7,10 @@ using System.Windows.Input;
 
 namespace Jerry;
 
-
 [ImplementedBy(typeof(ExtendedDesktopManager.ExtendedDesktopManager))]
 [ImplementedBy(typeof(BaseDesktopManager))]
 [ImplementedBy(typeof(LayoutDesktopManager))]
-public interface IExtendedDesktopManager : IGlobalHotkeyHandler, IClientManager, IMouseKeyboardEventHandler , ISingleConsumer
+public interface IExtendedDesktopManager : IGlobalHotkeyHandler, IClientManager, IMouseKeyboardEventHandler, ISingleConsumer
 {
     public Mode Mode { get; }
     public string CurrentVersion { get; }
@@ -28,7 +26,6 @@ public interface IClientManager
     void RegisterClient(ConnectedClient proxy);
 
     void DisconnectClient(Ticket id);
-
 
     Task<bool> TrySendHeartbeat(Ticket id);
 

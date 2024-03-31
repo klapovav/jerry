@@ -2,6 +2,7 @@
 using System.Windows.Input;
 
 namespace JerryServer;
+
 public class DelegateCommand : ICommand
 {
     public Action CommandAction { get; set; }

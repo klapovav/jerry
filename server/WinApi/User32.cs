@@ -72,7 +72,7 @@ public static class User32
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    static extern bool GetKeyboardState(byte[] lpKeyState);
+    private static extern bool GetKeyboardState(byte[] lpKeyState);
 
     //[DllImport("user32.dll")]
     //static extern short GetKeyState(VirtualKeyStates nVirtKey);

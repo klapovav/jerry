@@ -1,17 +1,15 @@
 ﻿using Jerry.Hook.SysGlobalState;
 using Jerry.Hook.WinApi;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Jerry.SystemQueueModifier;
-public enum Variability 
+
+public enum Variability
 {
-    Static = 0, 
+    Static = 0,
     AboutToChange = 1,
 }
+
 internal class CursorPosSyncSupervisor
 {
     private DateTime creationTime;
@@ -44,6 +42,7 @@ internal class CursorPosSyncSupervisor
         creationTime = DateTime.MinValue;
         lastCursorPosition = Cursor.GetCursorPosition();
     }
+
     public bool TryGetCursorPosition(out NativePoint cursorFixedPosition)
     {
         Update();
@@ -52,5 +51,4 @@ internal class CursorPosSyncSupervisor
     }
 
     public bool InSync => CursorPositionVariability == Variability.Static;
-
 }

@@ -1,18 +1,18 @@
 ﻿using Jerry.ConfigurationManager;
-using Jerry.LayoutExt.Screen;
+using Jerry.Controllable;
 using Jerry.Coordinates;
+using Jerry.LayoutExt.Screen;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Jerry.Controllable;
 
 namespace Jerry.LayoutExt
 {
     internal class Layout
     {
         private readonly LocalLayout LocalComputer;
-        private readonly List<IVirtualDesktopLayout> Disconnected; 
+        private readonly List<IVirtualDesktopLayout> Disconnected;
         private readonly Dictionary<Ticket, IVirtualDesktopLayout> Screens;
 
         public Layout(Ticket localID)
@@ -42,7 +42,7 @@ namespace Jerry.LayoutExt
         {
             if (id == LocalComputer.ID)
             { return; }
-   
+
             if (Screens.Remove(id, out IVirtualDesktopLayout disconnected))
             {
                 Disconnected.Add(disconnected);
@@ -68,7 +68,6 @@ namespace Jerry.LayoutExt
             return new LocalCoordinate(vec.DX, vec.DY);
         }
 
-     
         public LayoutCoordinate GetIntersection(Ticket id, LayoutCoordinate from, LayoutCoordinate to)
         {
             return Screens[id].GetIntersection(from, to);
@@ -79,7 +78,7 @@ namespace Jerry.LayoutExt
             return Screens[monitorID].Contains(point);
         }
 
-        public bool TryGetMonitorAssociatedWith(LayoutCoordinate point, out Ticket monitorID) 
+        public bool TryGetMonitorAssociatedWith(LayoutCoordinate point, out Ticket monitorID)
         {
             var mon = Screens
                 .Where(pair => pair.Value.Contains(point))
@@ -89,7 +88,6 @@ namespace Jerry.LayoutExt
             return mon is not null;
         }
 
- 
         private static LayoutCoordinate Add(LayoutCoordinate origin, LocalCoordinate localCoordinate)
         {
             var x = origin.X + localCoordinate.X;

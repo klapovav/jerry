@@ -40,7 +40,7 @@ public class Gatekeeper : IDisposable
     public void TryAccept(Socket socket)
     {
         var stopwatch = Stopwatch.StartNew();
-        // Ensure that the HealthChecker does not halt (due to potentially 
+        // Ensure that the HealthChecker does not halt (due to potentially
         // outdated data) shortly after a new client is connected, as the number
         // of clients may change in the near future.
         clientHealthChecker.KeepRunning(TimeSpan.FromSeconds(3));
@@ -54,10 +54,9 @@ public class Gatekeeper : IDisposable
             output_key = keyExchange.GeAgreement(stream);
             input_key = keyExchange.GeAgreement(stream);
         }
-      
         catch (KeyExchangeException)
         {
-            Log.Error("Key exchange failed; Client and server couldn't agree on algorithm for key exchange and encryption"); 
+            Log.Error("Key exchange failed; Client and server couldn't agree on algorithm for key exchange and encryption");
             stream.Dispose();
             return;
         }
@@ -66,7 +65,7 @@ public class Gatekeeper : IDisposable
         var decryptor = new Encryptor(input_key);
         var layer = new CommunicationLayer(stream, encryptor, decryptor, false);  //DEBUG  encryption on/off
         var result = Handshake(layer, out var acceptedClient);
-        layer.NotifyConnectionResult(result); 
+        layer.NotifyConnectionResult(result);
 
         stopwatch.Stop();
         if (!result.Succeeded)
@@ -90,7 +89,7 @@ public class Gatekeeper : IDisposable
 
     private void CompleteDataUpdate()
     {
-        var keysToInclude = updateClientsTask?.Result; 
+        var keysToInclude = updateClientsTask?.Result;
         var keysToRemove = clients.Keys.Except(keysToInclude).ToList();
         foreach (var key in keysToRemove)
             clients.Remove(key, out _);
@@ -115,7 +114,7 @@ public class Gatekeeper : IDisposable
 
             var new_init_info = validationResult.RepairedInfo;
             client = new ConnectedClient(layer, new Ticket(handshakeCount), new_init_info);
-            if (!clients.TryAdd(client.Info.Guid, client.ID)) 
+            if (!clients.TryAdd(client.Info.Guid, client.ID))
             {
                 return new HandshakeResult(Rejection.Unknown);
             }
@@ -168,6 +167,6 @@ public class Gatekeeper : IDisposable
     {
         clientHealthChecker.Dispose();
         DisconnectAll();
-        clients.Clear(); 
+        clients.Clear();
     }
 }

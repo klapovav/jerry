@@ -63,12 +63,13 @@ public class Server : IControllableComputer
 
     private void OnClipboardChange(object sender, SharpClipboard.ClipboardChangedEventArgs e)
     {
-
         LocalClipData ??= new ClipboardData() { Format = Format.File };
         switch (e.ContentType)
         {
             case SharpClipboard.ContentTypes.Files:
+
                 #region UNDONE
+
                 var files = string.Join("\n", Clipboard.ClipboardFiles);
                 Log.Debug("Clipboard content changed - [Files] [{number}]: {new}", Clipboard.ClipboardFiles.Count, files);
                 LocalClipData = new ClipboardData()
@@ -76,8 +77,11 @@ public class Server : IControllableComputer
                     Format = Format.File,
                     Message = string.Join("\n", Clipboard.ClipboardFiles)
                 };
+
                 #endregion UNDONE
+
                 break;
+
             case SharpClipboard.ContentTypes.Text:
                 //REVIEW e.Content.ToString() ~ Clipboard.ClipboardText
                 LocalClipData.Format = Format.Text;
@@ -113,6 +117,4 @@ public class Server : IControllableComputer
 
     public void ToogleMouseMode()
     { }
-
-
 }

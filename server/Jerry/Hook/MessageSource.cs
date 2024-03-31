@@ -1,4 +1,5 @@
 ﻿namespace Jerry.Hook;
+
 public enum MessageSource
 {
     Hardware = 0,

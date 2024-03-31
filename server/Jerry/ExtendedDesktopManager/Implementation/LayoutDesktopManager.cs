@@ -1,8 +1,6 @@
 ﻿using Jerry.Hook;
 using Jerry.LayoutExt;
-using Jerry.Coordinates;
 using System;
-using Jerry.Connection;
 
 namespace Jerry.ExtendedDesktopManager;
 
@@ -46,18 +44,19 @@ internal class LayoutDesktopManager : BaseDesktopManager
     }
 
     public override void OnMouseEvent(Events.MouseDeltaMove mouseMove)
-    { 
+    {
         var previousCoordinate = ExtDesktopLayout.GetCursorPositionInLayout(Active);
         var newCoordinateCandidate = previousCoordinate + mouseMove;
         var transition = PeekNewPosition(previousCoordinate, newCoordinateCandidate);
 
         switch (transition.moveType)
         {
-            case TransitionType.InsideActiveScreenArea: 
+            case TransitionType.InsideActiveScreenArea:
             case TransitionType.UnallocatedArea:
                 //V1
                 base.OnMouseEvent(mouseMove);
                 break;
+
             case TransitionType.RemoteToRemote:
                 var remote = ExtDesktopLayout.LayoutCoordinateToLocal(transition.leavingPosition);
                 Active.OnMouseMove(remote.X, remote.Y);
@@ -65,6 +64,7 @@ internal class LayoutDesktopManager : BaseDesktopManager
                 var init = ExtDesktopLayout.LayoutCoordinateToLocal(transition.initialPosition);
                 Active.OnMouseMove(init.X, init.Y);
                 break;
+
             case TransitionType.RemoteToLocal:
                 var remote2 = ExtDesktopLayout.LayoutCoordinateToLocal(transition.leavingPosition);
                 Active.OnMouseMove(remote2.X, remote2.Y);
@@ -72,14 +72,16 @@ internal class LayoutDesktopManager : BaseDesktopManager
                 var init2 = ExtDesktopLayout.LayoutCoordinateToLocal(transition.initialPosition);
                 Active.OnMouseMove(init2.X, init2.Y);
                 break;
+
             case TransitionType.LocalToRemote:
                 break;
+
             default:
                 break;
         }
     }
 
-    private Transition PeekNewPosition(LayoutCoordinate previous, LayoutCoordinate candidate) 
+    private Transition PeekNewPosition(LayoutCoordinate previous, LayoutCoordinate candidate)
     {
         var transition = new Transition
         {
@@ -106,7 +108,6 @@ internal class LayoutDesktopManager : BaseDesktopManager
         //transition.leavingPosition = id.trim(candidate);
         return transition;
     }
-
 
     private TransitionType GetScreenChangeType(Ticket from, Ticket to)
     {

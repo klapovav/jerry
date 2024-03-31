@@ -37,7 +37,7 @@ public class TrayIconVM : INotifyPropertyChanged
             OnPropertyChanged(nameof(ChangeModeTitle));
 
             ClearDependencies();
-      
+
             desktopManager = new ExtendedDesktopManager(value, OnActiveChanged);
             trafficController = new TrafficController(desktopManager);
             rawTcp = new TcpServer(desktopManager, settings);
@@ -86,16 +86,14 @@ public class TrayIconVM : INotifyPropertyChanged
     public string DisconnectClientsTitle => rawTcp.IsRunning
         ? "Reconnect clients"
         : "Disconnect clients";
- 
 
     public ICommand DisconnectClientsCommand => new DelegateCommand
     {
         CanExecuteFunc = () => true,
-        CommandAction = () => {
-
+        CommandAction = () =>
+        {
             rawTcp.DisconnectAll();
         }
-
     };
 
     public ICommand SwitchModeCommand => new DelegateCommand

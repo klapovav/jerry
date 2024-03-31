@@ -1,6 +1,6 @@
-﻿using Jerry.Hook;
+﻿using Jerry.Coordinates;
+using Jerry.Hook;
 using Jerry.Hook.WinApi;
-using Jerry.Coordinates;
 using System.Drawing;
 
 namespace Jerry.Events;
@@ -12,7 +12,7 @@ public readonly struct MouseDeltaMove : IVector, ICoordinate
 
     public MouseDeltaMove(NativePoint lastMousePosition, MouseHookStruct currentMouseStruct)
     {
-        mouseStruct =currentMouseStruct;
+        mouseStruct = currentMouseStruct;
         var current = currentMouseStruct;
         DX = current.pt.x - lastMousePosition.x;
         DY = current.pt.y - lastMousePosition.y;
@@ -26,7 +26,7 @@ public readonly struct MouseDeltaMove : IVector, ICoordinate
             (MouseFlags.INJECTED, Constants.JerryClientID) => MessageSource.JerryClient,
             //(MouseFlags.INJECTED | MouseFlags.LOWER_IL_INJECTED, _) => MessageSource.AnotherAppLowerLevel,
             (MouseFlags.INJECTED, _) => MessageSource.AnotherApp,
-            (_, _) => MessageSource.AnotherApp, 
+            (_, _) => MessageSource.AnotherApp,
         };
     }
 

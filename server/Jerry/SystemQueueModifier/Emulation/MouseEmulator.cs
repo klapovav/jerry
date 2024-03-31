@@ -3,6 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Jerry.SystemQueueModifier.Emulation;
+
 public enum MouseButton
 {
     Left,

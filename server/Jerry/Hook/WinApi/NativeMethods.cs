@@ -14,6 +14,7 @@ internal static class NativeMethods
     {
         return (ushort)(dwValue >> 0x10);
     }
+
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern IntPtr SetWindowsHookEx(int idHook, HookProc callback, IntPtr hInstance, uint dwThreadId);
 

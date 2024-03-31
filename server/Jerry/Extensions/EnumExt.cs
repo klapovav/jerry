@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace Jerry.Extensions;
 
 public static class EnumExt
@@ -16,7 +15,6 @@ public static class EnumExt
             return false;
         }
     }
-
 
     public static T Add<T>(this System.Enum type, T value)
     {
@@ -50,4 +48,3 @@ public static class EnumExt
         }
     }
 }
-

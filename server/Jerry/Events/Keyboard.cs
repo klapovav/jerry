@@ -8,9 +8,10 @@ public readonly struct KeyboardHookEvent
 {
     private readonly KeyboardHookStruct _hookStruct;
 
-    //System.Windows.Input dle MSDN ~  vkCode 
+    //System.Windows.Input dle MSDN ~  vkCode
     //https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
     public readonly Keys Key => (Keys)_hookStruct.vkCode;
+
     public readonly KeyState KeyState => Flags.HasFlag(KeyFlags.KEY_RELEASED) ? KeyState.KeyUp : KeyState.KeyDown;
     public readonly KeyFlags Flags;
     public readonly uint KeyCode => _hookStruct.vkCode;

@@ -30,7 +30,6 @@ public partial class App : Application
             .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}{Exception}")
             .WriteTo.File("log/", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}{Exception}")
             .CreateLogger();
-
     }
 
     private void SetCurrentThreadExtra(UInt16 id)

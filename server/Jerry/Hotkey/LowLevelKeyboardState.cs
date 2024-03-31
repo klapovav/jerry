@@ -12,6 +12,7 @@ public class LowLevelKeyboardState
     private readonly IEnumerable<JerryKeyGesture> JerryHotkeys;
     private readonly IEnumerable<KeyGesture> SystemILHotkeys;
     private ModifierKeys pressedModifiers;
+
     public LowLevelKeyboardState()
     {
         JerryHotkeys = new List<JerryKeyGesture>
@@ -42,7 +43,6 @@ public class LowLevelKeyboardState
     private void Press(ModifierKeys modifier) => pressedModifiers |= modifier;
 
     private void Release(ModifierKeys modifier) => pressedModifiers &= ~modifier;
-
 
     public bool HotkeyEvent(uint keyCode, out JerryKeyGesture pressedGesture)
     {

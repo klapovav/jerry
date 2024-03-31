@@ -6,7 +6,7 @@
     {
         MOUSEMOVE = 0x200,
         MOUSEWHEEL = 0x20a,
-        MOUSEHWHEEL = 0x020E,  
+        MOUSEHWHEEL = 0x020E,
         LBUTTONDOWN = 0x201,
         LBUTTONUP = 0x202,
         RBUTTONDOWN = 0x204,
@@ -57,6 +57,4 @@
         public const uint WHEEL_UP = 0x00780000;
         public const uint WHEEL_DOWN = 0xff880000;
     }
-
- 
 }

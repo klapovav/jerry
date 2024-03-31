@@ -5,6 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Jerry.Hook;
+
 public enum MouseEvent
 {
     Move,
@@ -16,10 +17,15 @@ public enum MouseEvent
 public sealed class MouseHook : BaseHook
 {
     public event OnMouseMoveEventHandler OnMouseMove;
+
     public event OnMouseWheelEventHandler OnMouseWheel;
+
     public event OnMouseButtonEventHandler OnMouseButton;
+
     public delegate FilterResult OnMouseMoveEventHandler(MouseHookStruct mouseHookStruct);
+
     public delegate FilterResult OnMouseWheelEventHandler(Events.MouseWheel mouseWheel);
+
     public delegate FilterResult OnMouseButtonEventHandler(Events.MouseButton mouseButton);
 
     public MouseHook() : base(HookType.MouseHook)
@@ -45,7 +51,7 @@ public sealed class MouseHook : BaseHook
         Log.Error("[BUG] Low-level mouse hook message {type}: {str}", type, hookStruct.ToString());
     }
 
-    /// <summary>   
+    /// <summary>
     /// </summary>
     /// <param name="nCode"></param>
     /// <param name="wParam">The identifier of the mouse message.</param>
@@ -57,15 +63,13 @@ public sealed class MouseHook : BaseHook
         var now = Environment.TickCount;
         var delay = now - mouseStruct.time;
 
-
-//            if (GetMessageSource(mouseStruct) == MessageSource.JerryClient)
-//            {
-
-//#if DEBUGLOOPBACK //Keyboard 
-//            return wParam == WM.WM_MOUSEMOVE ? FilterResult.Discard : FilterResult.Keep;
-//#endif
-//                return FilterResult.Discard;
-//            }
+        //            if (GetMessageSource(mouseStruct) == MessageSource.JerryClient)
+        //            {
+        //#if DEBUGLOOPBACK //Keyboard
+        //            return wParam == WM.WM_MOUSEMOVE ? FilterResult.Discard : FilterResult.Keep;
+        //#endif
+        //                return FilterResult.Discard;
+        //            }
         var response = FilterResult.Keep;
         switch (wParam)
         {
@@ -89,7 +93,7 @@ public sealed class MouseHook : BaseHook
                 break;
         }
         var st = mouseStruct;
-        
+
         Log.Verbose("{@type} filter function: {m_type,8} {behav,8} {x,4}x{y,4} {inj,11} {s}", HookType.MouseHook, (MouseMessage)wParam, response, st.pt.x, st.pt.y, (MouseFlags)st.flags, GetMessageSource(mouseStruct));
 
         return response;
@@ -101,10 +105,9 @@ public sealed class MouseHook : BaseHook
 
         return (flags, mouseStruct.dwExtraInfo) switch
         {
-            
             (MouseFlags.NOT_INJECTED, _) => MessageSource.Hardware,
             (MouseFlags.INJECTED, Constants.JerryServerID) => MessageSource.JerryServer,
-            (MouseFlags.INJECTED, Constants.JerryClientID) => MessageSource.JerryClient, 
+            (MouseFlags.INJECTED, Constants.JerryClientID) => MessageSource.JerryClient,
             //(MouseFlags.INJECTED | MouseFlags.LOWER_IL_INJECTED, _) => MessageSource.AnotherAppLowerLevel,
             (MouseFlags.INJECTED, _) => MessageSource.AnotherApp,
             (_, _) => MessageSource.Hardware,
@@ -121,7 +124,7 @@ public sealed class MouseHook : BaseHook
                 // A positive value indicates that the wheel was rotated forward (i.e. away from the user).
                 // A negative value indicates that the wheel was rotated backward (i.e. toward the user).
                 (WM.WM_MOUSEWHEEL, < 0) => new(Direction.Down, amount), //settings 4 lines: 120, -120
-                (WM.WM_MOUSEWHEEL, > 0) => new(Direction.Up, amount),   
+                (WM.WM_MOUSEWHEEL, > 0) => new(Direction.Up, amount),
                 //away from the user;
                 (WM.WM_MOUSEHWHEEL, < 0) => new(Direction.Left, amount),
                 (WM.WM_MOUSEHWHEEL, > 0) => new(Direction.Right, amount), //settings 1 char: 30, -30

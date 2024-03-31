@@ -2,11 +2,14 @@
 using Jerry.Hook;
 
 namespace Jerry.SystemQueueModifier;
+
 internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<KeyboardInputType>
 {
     private KeyboardHook KeyboardHook;
     private KeyboardSyncSupervisor keyboardState;
+
     public event OnKeyboardEventHandler OnKeyboardEvent;
+
     public delegate FilterResult OnKeyboardEventHandler(KeyboardHookEvent keyboardHookEvent);
 
     public SystemQueueModifierKeyboard(KeyboardInputType noneEvent) : base(noneEvent)
@@ -36,7 +39,7 @@ internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<Keyb
 
     protected override void InstallHook()
     {
-        if (KeyboardHook is null || KeyboardHook.IsInstalled) 
+        if (KeyboardHook is null || KeyboardHook.IsInstalled)
             return;
         KeyboardHook.Install();
         keyboardState = new KeyboardSyncSupervisor();

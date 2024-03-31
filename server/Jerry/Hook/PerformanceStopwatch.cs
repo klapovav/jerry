@@ -9,8 +9,10 @@ namespace Jerry.Hook
         internal TimeSpan Total = TimeSpan.Zero;
         internal TimeSpan Longest = TimeSpan.Zero;
         internal uint DataCount = 0;
+
         public ExecTimeStats()
         { }
+
         internal readonly TimeSpan Average => DataCount == 0 ? TimeSpan.Zero : Total.Divide(DataCount);
 
         public void Add(TimeSpan currentMeasurement)
@@ -21,6 +23,7 @@ namespace Jerry.Hook
                 Longest = currentMeasurement;
         }
     }
+
     public class DataCollector
     {
         private readonly HookType hookType;
@@ -38,7 +41,6 @@ namespace Jerry.Hook
             abnormalExecTime = hookType == HookType.MouseHook ? TimeSpan.FromTicks(100_000) : TimeSpan.FromTicks(100_000);
             this.hookType = hookType;
         }
-
 
         public void Collect(TimeSpan currentMeasurement)
         {

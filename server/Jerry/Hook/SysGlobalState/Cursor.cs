@@ -1,10 +1,7 @@
 ﻿using Jerry.Hook.WinApi;
-using System;
 using System.Runtime.InteropServices;
-using System.Windows.Threading;
 
 namespace Jerry.Hook.SysGlobalState;
-
 
 [StructLayout(LayoutKind.Sequential)]
 public struct POINT
@@ -20,7 +17,6 @@ public struct POINT
 
 public static class Cursor
 {
-  
     [DllImport("user32.dll")]
     private static extern bool GetCursorPos(out POINT lpPoint);
 

@@ -1,5 +1,5 @@
-﻿using Jerry.Extensions;
-using Jerry.Coordinates;
+﻿using Jerry.Coordinates;
+using Jerry.Extensions;
 using Slave;
 using System;
 using System.Collections.Concurrent;
@@ -62,7 +62,7 @@ public class ClientValidInfo
             warning = warning.Add(ErrorLeadingToDataCorrection.GuidInvalid);
             used = Guid.NewGuid();
         }
-        else if (localID == used || clients.ContainsKey(used)) 
+        else if (localID == used || clients.ContainsKey(used))
         {
             warning = warning.Add(ErrorLeadingToDataCorrection.GuidAlreadyUsed);
             used = GenerateUniqueGuid(clients, localID);

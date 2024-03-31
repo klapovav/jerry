@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace Jerry.Controllable;
+
 public class Client : IControllableComputer
 {
     private readonly CommunicationLayer comLayer;
@@ -54,7 +55,6 @@ public class Client : IControllableComputer
         }
         comLayer.TrySendMessage(comLayer.Factory.MouseMove(x, y));
     }
-
 
     public void OnMouseClick(Events.MouseButton ev)
     {
@@ -136,7 +136,6 @@ public class Client : IControllableComputer
 
     public void OnActivate(Common.Clipboard clipboard)
     {
-
         comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relative_move));
         if (clipboard is not null)
             comLayer.TrySendMessage(comLayer.Factory.ClipboardContent(clipboard.Message, clipboard.Format));
@@ -144,11 +143,11 @@ public class Client : IControllableComputer
 
     public void ToogleMouseMode()
     {
-
         comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
         relative_move = !relative_move;
         comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relative_move));
     }
+
     public void OnMouseWheel(MouseWheel wheel)
     {
         throw new NotImplementedException();
@@ -276,6 +275,4 @@ public class Client : IControllableComputer
             _ => vk, // layout independent
         };
     }
-
-
 }

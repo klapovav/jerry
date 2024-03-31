@@ -12,14 +12,13 @@ internal class ClientHealthChecker
     private readonly IPeriodicWorker worker;
     public readonly int CHECK_INTERVAL = 1000;
 
-
     public ClientHealthChecker(IClientManager vdm)
     {
         worker = new PeriodicWorker();
         clientManager = vdm;
     }
 
-    public void Start() 
+    public void Start()
     {
         KeepRunning(TimeSpan.FromSeconds(5));
         previousHeartbeatResult = null;

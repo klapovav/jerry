@@ -32,7 +32,7 @@ namespace Jerry.Hook.SysGlobalState
         private short StateFlags { get; init; }
         public bool Down => IsBitSet(StateFlags, 15);
         public bool RecentlyPressed => IsBitSet(StateFlags, 0);
- 
+
         public KeyState(short state)
         {
             StateFlags = state;

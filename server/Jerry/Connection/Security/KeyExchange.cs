@@ -18,6 +18,7 @@ internal class KeyExchange
 {
     //32B, 256bit
     private static readonly int AGREEMENT_SIZE = 32;
+
     private static readonly int STRENGTH = AGREEMENT_SIZE * 8;
 
     private readonly X25519KeyPairGenerator generator;

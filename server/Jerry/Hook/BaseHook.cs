@@ -1,9 +1,9 @@
-﻿using Serilog;
+﻿using Jerry.Hook.WinApi;
+using Serilog;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Jerry.Hook.WinApi;
 using System.Threading;
 
 namespace Jerry.Hook;
@@ -20,13 +20,12 @@ public enum FilterResult
     Discard = 1,
 }
 
-
 public interface IHook
 {
     public void Install();
+
     public void Uninstall();
 }
-
 
 public abstract class BaseHook : IDisposable, IHook
 {
@@ -76,7 +75,7 @@ public abstract class BaseHook : IDisposable, IHook
         if (Environment.CurrentManagedThreadId != expected.ManagedThreadId)
         {
             // This should never happen under normal circumstances.
-            Log.Warning("{@BaseHook} | Method {methodName} called from different thread: {id} ", this , nameof(this.Install), Thread.CurrentThread.ManagedThreadId);
+            Log.Warning("{@BaseHook} | Method {methodName} called from different thread: {id} ", this, nameof(this.Install), Thread.CurrentThread.ManagedThreadId);
         }
         DispatcherProvider.HookCallbackDispatcher.Invoke(() =>
         {
@@ -91,8 +90,6 @@ public abstract class BaseHook : IDisposable, IHook
             _logger.Debug("\t {@BaseHook}[{id}]  ", this, ID);
             _logger.Debug("{h}\tis installed: {i}", _hookType, IsInstalled);
         });
-
-
     }
 
     public void Uninstall()
@@ -132,7 +129,6 @@ public abstract class BaseHook : IDisposable, IHook
             }
             if (_user32LibraryHandle != IntPtr.Zero)
             {
-
                 if (!NativeMethods.FreeLibrary(_user32LibraryHandle))
                 {
                     int errorCode = Marshal.GetLastWin32Error();
@@ -154,4 +150,3 @@ public abstract class BaseHook : IDisposable, IHook
         GC.SuppressFinalize(this);
     }
 }
-

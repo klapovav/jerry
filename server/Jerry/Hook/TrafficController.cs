@@ -1,5 +1,3 @@
-using Jerry.Hook.SysGlobalState;
-using Jerry.Hook.WinApi;
 using Jerry.Hotkey;
 using Jerry.SystemQueueModifier;
 using Serilog;
@@ -15,7 +13,6 @@ public enum Strategy : int
     TransitionToLocal = 3
 }
 
-
 public class TrafficController : IDisposable
 {
     private readonly IMouseKeyboardEventHandler uiHandler;
@@ -29,7 +26,6 @@ public class TrafficController : IDisposable
     private readonly (bool, bool)[] KeyDownStrategy = new (bool, bool)[4];
     private readonly (bool, bool)[] KeyUpStrategy = new (bool, bool)[4];
     private readonly (bool, bool)[] DefaultStrategy = new (bool, bool)[4];
-
 
     public TrafficController(IExtendedDesktopManager desktopManager)
     {
@@ -81,7 +77,7 @@ public class TrafficController : IDisposable
                 uiHandler.ReleaseModifiers(sysgesture.Modifiers);
                 return FilterResult.Discard;
             }
-            // Jerry keyboard shortcut 
+            // Jerry keyboard shortcut
             if (lowLevelKeyboardState.HotkeyEvent(ke.KeyCode, out JerryKeyGesture gesture))
             {
                 if (gesture.Purpose == HotkeyType.SwitchDestination)
@@ -146,8 +142,6 @@ public class TrafficController : IDisposable
 
     #endregion -------   Handle Hook Callback -------------------
 
-
-
     public Strategy TrafficRules
     {
         get
@@ -206,7 +200,6 @@ public class TrafficController : IDisposable
         });
     }
 
-
     public void ToLocal() => TrafficRules = Strategy.TransitionToLocal;
 
     public void ToRemote() => TrafficRules = Strategy.TransitionToRemote;
@@ -252,10 +245,12 @@ public class TrafficController : IDisposable
             case Strategy.Local:
             case Strategy.Remote:
                 return;
+
             case Strategy.TransitionToLocal:
                 if (systemQueueModifier.CanUninstall())
                     TrafficRules = Strategy.Local;
                 break;
+
             case Strategy.TransitionToRemote:
                 if (systemQueueModifier.CanUninstall())
                     TrafficRules = Strategy.Remote;

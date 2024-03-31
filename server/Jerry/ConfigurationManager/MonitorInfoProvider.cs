@@ -10,7 +10,6 @@ public static class MonitorInfoProvider
     [DllImport("glutin_wrapper.dll")]
     private static extern Monitor get_monitor(string name);
 
-
     // public static IList<Tuple<Rectangle,String>> GetScreensRectangle()
     // {
     //     return GetScreensWin()
@@ -30,7 +29,7 @@ public static class MonitorInfoProvider
         {
             var mon = get_monitor(s.DeviceName);
             if (!mon.some)
-                throw new NullReferenceException(); 
+                throw new NullReferenceException();
             screens.Add(new MonitorInfo(mon, s));
         }
         return screens;
@@ -45,6 +44,4 @@ public static class MonitorInfoProvider
         }
         return screens;
     }
-
-  
 }

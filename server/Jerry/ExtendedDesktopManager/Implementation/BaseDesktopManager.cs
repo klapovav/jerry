@@ -1,6 +1,6 @@
-using Jerry.Hook;
 using Jerry.Controllable;
-using Jerry.Coordinates;
+using Jerry.Hook;
+using Jerry.Hotkey;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ClipboardData = Common.Clipboard;
-using Jerry.Hotkey;
 
 namespace Jerry.ExtendedDesktopManager;
 
@@ -55,7 +54,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     public virtual void RegisterClient(ConnectedClient client)
     {
         if (remoteClients.Where(s => s.Ticket == client.ID).Any()
-            ||  remoteClients.Where(s => s.ID == client.Info.Guid).Any())
+            || remoteClients.Where(s => s.ID == client.Info.Guid).Any())
         {
             Log.Error("The new client was rejected due to a non-unique ticket({id}) or guid", client.ID.ID);
             return;
@@ -68,8 +67,6 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public virtual void DisconnectClient(Ticket disc_id)
     {
-        
-
         try
         {
             if (Active.EqualsTicket(disc_id))
@@ -96,7 +93,6 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public void ReleaseModifiers(ModifierKeys modifiers)
     {
-
         Active.ReleaseModifiers(modifiers);
     }
 
@@ -129,7 +125,6 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         {
             LocalComputer.OnMouseMove(mouseMove.X, mouseMove.Y);
         }
-
         else
         {
             Active.OnMouseMove(mouseMove.DX, mouseMove.DY);
@@ -140,24 +135,25 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public void KeyGesture(HotkeyType type)
     {
-        Log.Debug("Pressed hotkey {a} ", type); 
+        Log.Debug("Pressed hotkey {a} ", type);
         switch (type)
         {
             case HotkeyType.SwitchToServer:
                 Switch(LocalComputer);
                 break;
+
             case HotkeyType.SwitchDestination:
                 Switch(GetNextScreen());
                 break;
+
             case HotkeyType.SwitchMouseMove:
                 Active.ToogleMouseMode();
                 break;
+
             default:
                 break;
         }
     }
-  
-
 
     protected void Switch(IControllableComputer newMonitor)
     {
@@ -203,9 +199,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         return newMonitor;
     }
 
-    #endregion HotkeyHandler SwitchScreen
-
-
+    #endregion HotkeyHandler
 
     public void SetSubscriber(IMouseKeyboardEventHandler subscriber)
     {

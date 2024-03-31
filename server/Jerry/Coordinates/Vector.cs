@@ -61,6 +61,4 @@ public class Vector : IVector
 
         return new Vector((int)(a.DX * b), (int)(a.DY * b));
     }
-
-
 }

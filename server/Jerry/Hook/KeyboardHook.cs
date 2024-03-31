@@ -6,9 +6,11 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Jerry.Hook;
+
 public sealed class KeyboardHook : BaseHook, IHook, IDisposable
 {
     public event OnKeyboardEventHandler OnKeyboardEvent;
+
     public delegate FilterResult OnKeyboardEventHandler(KeyboardHookEvent keyboardEvent);
 
     public KeyboardHook() : base(HookType.KeyboardHook)
@@ -31,7 +33,6 @@ public sealed class KeyboardHook : BaseHook, IHook, IDisposable
         };
     }
 
-   
     private FilterResult LowLevelKeyboardProc(IntPtr wParam, IntPtr lParam)
     {
         KeyboardHookStruct keyboardStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
@@ -39,18 +40,18 @@ public sealed class KeyboardHook : BaseHook, IHook, IDisposable
         var kbEvent = new KeyboardHookEvent(keyboardStruct, (int)wParam);
 
         LogStruct(kbEvent);
-//            if (kbEvent.Source() == MessageSource.JerryClient)
-//            {
-//#if DEBUGLOOPBACK 
-//            if (kbEvent.Injected)
-//                return FilterResult.Keep;
-//#endif
-//                return FilterResult.Discard;
-//            }
+        //            if (kbEvent.Source() == MessageSource.JerryClient)
+        //            {
+        //#if DEBUGLOOPBACK
+        //            if (kbEvent.Injected)
+        //                return FilterResult.Keep;
+        //#endif
+        //                return FilterResult.Discard;
+        //            }
 
         if (kbEvent.Key == Keys.NumLock)
         {
-            return FilterResult.Keep; 
+            return FilterResult.Keep;
         }
 
         var consumeEvent = OnKeyboardEvent?.Invoke(kbEvent) ?? FilterResult.Keep;

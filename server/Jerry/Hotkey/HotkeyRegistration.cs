@@ -1,9 +1,9 @@
 using NHotkey;
 using System;
 using System.Windows.Forms;
-using System.Windows.Input;
 
 namespace Jerry.Hotkey;
+
 public class HotkeyRegistration
 {
     public HotkeyType Purpose { get; init; }
@@ -33,15 +33,13 @@ public class HotkeyRegistration
                 NHotkey.Wpf.HotkeyManager.Current.AddOrReplace(Name, value, false, Handler);
                 _keyGesture = value;
             }
-            catch 
+            catch
             {
                 MessageBox.Show(string.Format("The global shortcut `{0}` is already registered by another process. Set another shortcut in the configuration and restart the program.",
                     value.GetDisplayStringForCulture(null)
 
                 ));
-
             }
-
         }
     }
 }

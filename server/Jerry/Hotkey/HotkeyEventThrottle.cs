@@ -1,8 +1,4 @@
-﻿using Serilog;
-using System;
-using System.Globalization;
-using System.Timers;
-using System.Windows.Input;
+﻿using System;
 
 namespace Jerry.Hotkey;
 
@@ -11,7 +7,7 @@ namespace Jerry.Hotkey;
 /// event sources and filtered by this class to avoid switching twice in a short period.
 /// </summary>
 
-public class HotkeyEventThrottle 
+public class HotkeyEventThrottle
 {
     private DateTime lastUnthrottledEventTime;
     private static readonly int THROTTLETIME = 150;
@@ -35,5 +31,4 @@ public class HotkeyEventThrottle
         hotkeyHandler.KeyGesture(HotkeyType.SwitchDestination);
         return true;
     }
-
 }

@@ -1,5 +1,5 @@
-﻿using Jerry.Connection.Gatekeeper;
-using Jerry.Connection;
+﻿using Jerry.Connection;
+using Jerry.Connection.Gatekeeper;
 
 namespace Jerry;
 

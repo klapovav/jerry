@@ -1,5 +1,5 @@
-﻿using Jerry.LayoutExt;
-using Jerry.Coordinates;
+﻿using Jerry.Coordinates;
+using Jerry.LayoutExt;
 using System.Drawing;
 
 namespace Jerry.Controllable;
@@ -68,7 +68,6 @@ public class ScreenSimple
         }
         return false;
     }
-
 
     private static bool Intersects(LineSegment a, Vector b1, Vector b2, out Vector intersection)
     {

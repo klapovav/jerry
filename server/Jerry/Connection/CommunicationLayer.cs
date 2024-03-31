@@ -28,7 +28,7 @@ public class CommunicationLayer : IDisposable
         this.encryptor = encryptor;
         this.decryptor = decryptor;
         encryption_on = encrypted;
-        Factory = new MessageFactory(); 
+        Factory = new MessageFactory();
     }
 
     public void NotifyConnectionResult(Connection.Gatekeeper.HandshakeResult result)
@@ -53,17 +53,16 @@ public class CommunicationLayer : IDisposable
         };
         TrySendMessage(echo);
         Disconnect();
-        Dispose(); 
+        Dispose();
     }
 
-   
     public bool TryGetRequest(Request requestType, out SlaveMessage response)
     {
         response = null;
 
         if (!TrySendMessage(Factory.Request(requestType)))
             return false;
-        
+
         if (!TryReadResponse(out response, requestType is Request.InitInfo))
         {
             Log.Warning("Server did not receive response for a request {p}", requestType);
@@ -86,7 +85,7 @@ public class CommunicationLayer : IDisposable
             if (FailureCount > 3)
                 return false;
             var encrypted = EncryptMessage(message);
-            networkStream.Write(encrypted); 
+            networkStream.Write(encrypted);
             FailureCount = 0;
             return true;
         }
@@ -94,7 +93,7 @@ public class CommunicationLayer : IDisposable
         {
             FailureCount++;
             if (FailureCount == 1)
-                Log.Warning($"Sending message failed. {e.Message}");  
+                Log.Warning($"Sending message failed. {e.Message}");
             return false;
         }
     }
@@ -134,11 +133,12 @@ public class CommunicationLayer : IDisposable
         {
             FailureCount++;
             if (FailureCount == 1)
-                Log.Warning($"Read response failed. {e.Message}"); 
+                Log.Warning($"Read response failed. {e.Message}");
             msg = null;
             return false;
         }
-        finally{
+        finally
+        {
             networkStream.ReadTimeout = 100;
         }
     }
@@ -152,6 +152,7 @@ public class CommunicationLayer : IDisposable
         //encryption
         return encryption_on ? encryptor.EncryptOrDecrypt(ms.ToArray()) : ms.ToArray();
     }
+
     public bool IsConnected()
     {
         try

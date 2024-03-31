@@ -1,11 +1,13 @@
-﻿using Jerry.Coordinates;
+﻿using Jerry.Controllable;
+using Jerry.Coordinates;
 using System.Drawing;
-using Jerry.Controllable;
 
 namespace Jerry.LayoutExt.Screen;
+
 internal class RemoteLayout : IVirtualDesktopLayout
 {
     private readonly ScreenSimple Primary = null;
+
     public RemoteLayout(Size resolution, LayoutCoordinate position, string name, Ticket id)
     {
         var rect = new Rectangle(position.IntoPoint, resolution);
