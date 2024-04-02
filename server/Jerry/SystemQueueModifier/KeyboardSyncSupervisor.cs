@@ -19,10 +19,10 @@ internal class KeyboardSyncSupervisor
     private readonly TimeSpan delay = TimeSpan.FromMilliseconds(100);
     private readonly List<byte> mouseButtons = new() { 1, 2, 4, 5, 6 };
     private readonly IEnumerable<byte> allVirtualKeys = Enumerable.Range(1, 255).Select(i => (byte)i).ToArray();
+    private readonly List<byte> virtualKeys;
     private Reliability state;
     private string lastLoggedValue;
     private IEnumerable<byte> previouslyPressed;
-    private List<byte> virtualKeys;
 
     public bool Trustworthy
     {
