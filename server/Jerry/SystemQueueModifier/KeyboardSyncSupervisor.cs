@@ -60,7 +60,6 @@ internal class KeyboardSyncSupervisor
         throw new NotImplementedException();
     }
 
-
     public bool AllKeysAreReleased()
     {
         //Querying the state of the keyboard is still not reliable
@@ -91,5 +90,4 @@ internal class KeyboardSyncSupervisor
             Serilog.Log.Debug("Virtual keys {a}-{b} are released", virtualKeys.First(), virtualKeys.Last());
 
     }
-
 }

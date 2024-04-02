@@ -31,7 +31,7 @@ public class CommunicationLayer : IDisposable
         Factory = new MessageFactory();
     }
 
-    public void NotifyConnectionResult(Connection.Gatekeeper.HandshakeResult result)
+    public void SendConnectionResult(Connection.Gatekeeper.HandshakeResult result)
     {
         if (result.Succeeded)
         {
@@ -93,7 +93,7 @@ public class CommunicationLayer : IDisposable
         {
             FailureCount++;
             if (FailureCount == 1)
-                Log.Warning($"Sending message failed. {e.Message}");
+                Log.Warning($"Failed to send data {e.Message}");
             return false;
         }
     }

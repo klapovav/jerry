@@ -87,7 +87,7 @@ public abstract class BaseHook : IDisposable, IHook
                 Log.Error("Failed to setup hook. Error: " + Marshal.GetLastWin32Error());
             else
                 dataCollector = new DataCollector(_hookType);
-            _logger.Debug("\t {@BaseHook}[{id}]  ", this, ID);
+            _logger.Verbose("{@BaseHook}[{id}]  ", this, ID);
             _logger.Debug("{h}\tis installed: {i}", _hookType, IsInstalled);
         });
     }
@@ -112,7 +112,7 @@ public abstract class BaseHook : IDisposable, IHook
             _hookHandle = IntPtr.Zero;
 
             _logger.Debug("{h}\tis installed: {i}", _hookType, IsInstalled);
-            _logger.Debug("\t {@BaseHook}[{id}]", this, ID);
+            _logger.Verbose("{@BaseHook}[{id}]", this, ID);
             dataCollector.LogStats();
         });
     }

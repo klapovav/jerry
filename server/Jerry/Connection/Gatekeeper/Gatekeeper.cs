@@ -32,9 +32,9 @@ public class Gatekeeper : IDisposable
         clientHealthChecker = new(virtualDesk);
         clients = new ConcurrentDictionary<Guid, Ticket>();
 
-        Log.Debug("Server's password : {0}", correctPassword);
-        Log.Debug("Server's heartbeat interval : {0}ms", clientHealthChecker.CHECK_INTERVAL);
-        Log.Debug("Server's guid : '{0}'", serverID);
+        Log.Debug("Password : {0}", correctPassword);
+        Log.Debug("Heartbeat interval : {0}ms", clientHealthChecker.CHECK_INTERVAL);
+        Log.Debug("Server ID : '{0}'", serverID);
     }
 
     public void TryAccept(Socket socket)
@@ -65,7 +65,7 @@ public class Gatekeeper : IDisposable
         var decryptor = new Encryptor(input_key);
         var layer = new CommunicationLayer(stream, encryptor, decryptor, false);  //DEBUG  encryption on/off
         var result = Handshake(layer, out var acceptedClient);
-        layer.NotifyConnectionResult(result);
+        layer.SendConnectionResult(result);
 
         stopwatch.Stop();
         if (!result.Succeeded)
