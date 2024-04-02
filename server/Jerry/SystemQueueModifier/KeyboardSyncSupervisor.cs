@@ -17,13 +17,12 @@ internal class KeyboardSyncSupervisor
 {
     private readonly DateTime creationTime;
     private readonly TimeSpan delay = TimeSpan.FromMilliseconds(100);
-    private readonly uint keyFirst;
-    private readonly uint keyLast;
+    private readonly List<byte> mouseButtons = new() { 1, 2, 4, 5, 6 };
+    private readonly IEnumerable<byte> allVirtualKeys = Enumerable.Range(1, 255).Select(i => (byte)i).ToArray();
     private Reliability state;
-
     private string prevLogContent;
-
-    private List<uint> previouslyPressed;
+    private IEnumerable<byte> previouslyPressed;
+    private List<byte> virtualKeys;
 
     public bool Trustworthy
     {
@@ -45,12 +44,10 @@ internal class KeyboardSyncSupervisor
 
     public KeyboardSyncSupervisor(bool mouse = false)
     {
-        keyFirst = (uint)(mouse ? 1 : 7);
-        keyLast = (uint)(mouse ? 6 : 254);
-
         creationTime = DateTime.Now;
         state = Reliability.Unreliable;
-        previouslyPressed = new List<uint>();
+        previouslyPressed = new List<byte>();
+        virtualKeys = mouse ? mouseButtons : allVirtualKeys.Except(mouseButtons).ToList();
     }
 
     public static bool KeyIsVirtuallyDown(uint vk_code)
@@ -63,10 +60,7 @@ internal class KeyboardSyncSupervisor
         throw new NotImplementedException();
     }
 
-    public void On()
-    {
-        throw new NotImplementedException();
-    }
+
 
     public bool AllKeysAreReleased()
     {
@@ -77,18 +71,18 @@ internal class KeyboardSyncSupervisor
         }
 
         previouslyPressed = previouslyPressed.Where(key => KeyIsVirtuallyDown(key)).ToList();
-        if (previouslyPressed.Count == 0)
+        if (!previouslyPressed.Any())
         {
-            for (uint i = keyFirst; i <= keyLast; i++)
+            foreach (var key in virtualKeys)
             {
-                if (KeyIsVirtuallyDown(i))
+                if (KeyIsVirtuallyDown(key))
                 {
-                    previouslyPressed.Add(i);
+                    previouslyPressed = previouslyPressed.Append(key);
                 }
             }
-            if (previouslyPressed.Count == 0)
+            if (!previouslyPressed.Any())
             {
-                Log.Debug("Virtual keys {a}-{b} are released", keyFirst, keyLast);
+                Log.Debug("Virtual keys {a}-{b} are released", virtualKeys.First(), virtualKeys.Last());
                 return true;
             }
         }
