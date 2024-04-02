@@ -19,10 +19,10 @@ internal class KeyboardSyncSupervisor
     private readonly TimeSpan delay = TimeSpan.FromMilliseconds(100);
     private readonly List<byte> mouseButtons = new() { 1, 2, 4, 5, 6 };
     private readonly IEnumerable<byte> allVirtualKeys = Enumerable.Range(1, 255).Select(i => (byte)i).ToArray();
+    private readonly List<byte> virtualKeys;
     private Reliability state;
-    private string prevLogContent;
+    private string lastLoggedValue;
     private IEnumerable<byte> previouslyPressed;
-    private List<byte> virtualKeys;
 
     public bool Trustworthy
     {
@@ -44,10 +44,10 @@ internal class KeyboardSyncSupervisor
 
     public KeyboardSyncSupervisor(bool mouse = false)
     {
+        virtualKeys = mouse ? mouseButtons : allVirtualKeys.Except(mouseButtons).ToList();
         creationTime = DateTime.Now;
         state = Reliability.Unreliable;
         previouslyPressed = new List<byte>();
-        virtualKeys = mouse ? mouseButtons : allVirtualKeys.Except(mouseButtons).ToList();
     }
 
     public static bool KeyIsVirtuallyDown(uint vk_code)
@@ -61,7 +61,6 @@ internal class KeyboardSyncSupervisor
     }
 
 
-
     public bool AllKeysAreReleased()
     {
         //Querying the state of the keyboard is still not reliable
@@ -69,29 +68,27 @@ internal class KeyboardSyncSupervisor
         {
             return false;
         }
+        var stillPressed = previouslyPressed
+            .Where(vk => KeyIsVirtuallyDown(vk));
 
-        previouslyPressed = previouslyPressed.Where(key => KeyIsVirtuallyDown(key)).ToList();
-        if (!previouslyPressed.Any())
-        {
-            foreach (var key in virtualKeys)
-            {
-                if (KeyIsVirtuallyDown(key))
-                {
-                    previouslyPressed = previouslyPressed.Append(key);
-                }
-            }
-            if (!previouslyPressed.Any())
-            {
-                Log.Debug("Virtual keys {a}-{b} are released", virtualKeys.First(), virtualKeys.Last());
-                return true;
-            }
-        }
+        previouslyPressed = stillPressed.Any()
+            ? stillPressed
+            : virtualKeys
+                .Where(vk => KeyIsVirtuallyDown(vk));
+
+        Log();
+        return !previouslyPressed.Any();
+
+    }
+    private void Log()
+    {
         var pressedKeys = string.Join(" + ", previouslyPressed.Select(k => (Keys)k));
-        if (pressedKeys != prevLogContent)
-        {
-            Log.Debug("Pressed virtual keys: {i}", pressedKeys);
-            prevLogContent = pressedKeys;
-        }
-        return false;
+        if (lastLoggedValue == pressedKeys)
+            return;
+        lastLoggedValue = pressedKeys;
+        if (previouslyPressed.Any())
+            Serilog.Log.Debug("Pressed virtual keys: {i}", pressedKeys);
+        else
+            Serilog.Log.Debug("Virtual keys {a}-{b} are released", virtualKeys.First(), virtualKeys.Last());
     }
 }
