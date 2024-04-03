@@ -36,8 +36,10 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
 
     private FilterResult MouseHook_OnMouseWheel(Events.MouseWheel mouseWheel)
     {
-        subscriber.OnMouseEvent(mouseWheel);
-
+        if (SubscribedInput.HasFlag(MouseInput.Wheel))
+        {
+            subscriber.OnMouseEvent(mouseWheel);
+        }
         var stopPropagation = BlockedInputTypes.HasFlag(MouseInput.Wheel);
 
         return stopPropagation
@@ -59,7 +61,10 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
             Log.Debug("[X] SQM.MouseMove discarded. Event injected by another app");
             return FilterResult.Discard;
         }
-        subscriber.OnMouseEvent(ev);
+        if (SubscribedInput.HasFlag(MouseInput.Move))
+        {
+            subscriber.OnMouseEvent(ev);
+        }
         var stopPropagation = BlockedInputTypes.HasFlag(MouseInput.Move);
         if (!stopPropagation)
         {
@@ -74,9 +79,12 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
         return filterResult;
     }
 
-    private FilterResult MouseHook_OnMouseButton(Events.MouseButton mouseButton)
+    private FilterResult MouseHook_OnMouseButton(MouseButton mouseButton)
     {
-        subscriber.OnMouseEvent(mouseButton);
+        if (SubscribedInput.HasFlag(MouseInput.Button))
+        {
+            subscriber.OnMouseEvent(mouseButton);
+        }
         var stopPropagation = mouseButton.IsDown
             ? BlockedInputTypes.HasFlag(MouseInput.ButtonDown)
             : BlockedInputTypes.HasFlag(MouseInput.ButtonUp);

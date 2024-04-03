@@ -17,7 +17,10 @@ internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<Keyb
 
     private FilterResult LL_KeyboardHook_OnKeyboardEvent(KeyboardHookEvent keyboardEvent)
     {
-        subscriber.OnKeyboardEvent(keyboardEvent);
+        if (SubscribedInput.HasFlag(KeyboardInput.All))
+        {
+            subscriber.OnKeyboardEvent(keyboardEvent);
+        }
 
         var stopPropagation = keyboardEvent.Pressed
             ? BlockedInputTypes.HasFlag(KeyboardInput.KeyDown)

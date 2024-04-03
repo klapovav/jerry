@@ -1,7 +1,6 @@
 using Jerry.Events;
 using Jerry.Hotkey;
 using Jerry.SystemQueueModifier;
-using Master;
 using Serilog;
 using System;
 
@@ -23,8 +22,6 @@ public class TrafficController : IDisposable, IInputSubscriber
     private readonly HotkeyEventThrottle eventThrottle;
     private readonly LowLevelKeyboardState lowLevelKeyboardState;
     private Strategy traffic_rules;
-    private readonly (bool, bool) LOCAL = (true, false);
-    private readonly (bool, bool) REMOTE = (false, true);
 
 
     public TrafficController(IExtendedDesktopManager desktopManager)
@@ -34,10 +31,7 @@ public class TrafficController : IDisposable, IInputSubscriber
         _initializehotkey.OnSwitchMonitorEvent += GlobalSystemHotkey_OnSwitchMonitorEvent;
         lowLevelKeyboardState = new LowLevelKeyboardState();
         eventThrottle = new HotkeyEventThrottle();
-
         systemQueueModifier = new(this);
-
-
         TrafficRules = Strategy.Local;
         uiHandler = desktopManager;
     }
@@ -71,39 +65,25 @@ public class TrafficController : IDisposable, IInputSubscriber
             }
         }
 
-        var (_passEvent, sendToRemote) = GetKeyStrategy(ke.Pressed);
-        if (sendToRemote)
-        {
-            uiHandler.OnKeyboardEvent(ke);
-        }
-
-        
+        uiHandler.OnKeyboardEvent(ke);
     }
+
     [Obsolete]
     public void OnMouseEvent(MouseButton ev)
     {
         TryEndTransition();
-        var (passEvent, sendToRemote) = GetStrategy(ev);
-
-        if (sendToRemote)
-            uiHandler.OnMouseEvent(ev);
+        uiHandler.OnMouseEvent(ev);
     }
     [Obsolete]
     public void OnMouseEvent(MouseDeltaMove mouseMove)
     {
         TryEndTransition();
-
-        var (_, sendToRemote) = StatelessEventsStrategy();
-
-        if (sendToRemote)
-            uiHandler.OnMouseEvent(mouseMove);
+        uiHandler.OnMouseEvent(mouseMove);
     }
     [Obsolete]
     public void OnMouseEvent(Events.MouseWheel mouseWheel)
     {
-        var (_, sendToRemote) = GetStrategy(mouseWheel);
-        if (sendToRemote)
-            uiHandler.OnMouseEvent(mouseWheel);
+        uiHandler.OnMouseEvent(mouseWheel);
     }
 
 
@@ -171,40 +151,6 @@ public class TrafficController : IDisposable, IInputSubscriber
     public void ToLocal() => TrafficRules = Strategy.TransitionToLocal;
 
     public void ToRemote() => TrafficRules = Strategy.TransitionToRemote;
-
-    private (bool, bool) GetStrategy(Events.MouseButton btn)
-    {
-        return GetKeyStrategy(btn.IsDown);
-    }
-
-    private (bool, bool) GetStrategy(Events.MouseWheel _)
-    {
-        return StatelessEventsStrategy();
-    }
-
-    private (bool, bool) StatelessEventsStrategy()
-    {
-        return (TrafficRules) switch
-        {
-            Strategy.Local => LOCAL,
-            Strategy.Remote => REMOTE,
-            Strategy.TransitionToRemote => REMOTE,
-            Strategy.TransitionToLocal => LOCAL,
-            _ => throw new NotImplementedException(),
-        };
-    }
-
-    private (bool, bool) GetKeyStrategy(bool down)
-    {
-        return (TrafficRules) switch
-        {
-            Strategy.Local => LOCAL,
-            Strategy.Remote => REMOTE,
-            Strategy.TransitionToRemote => down ? REMOTE : (true, true),
-            Strategy.TransitionToLocal => LOCAL,
-            _ => throw new NotImplementedException(),
-        };
-    }
 
     private void TryEndTransition()
     {
