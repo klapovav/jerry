@@ -60,29 +60,28 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         Log.Information("New client: \"{GUID}\"[{id}] \t Number of connected clients: {Count}", client.Info.Guid, client.ID.ID, remoteClients.Count);
     }
 
-    public virtual void DisconnectClient(Ticket disc_id)
+    public virtual void DisconnectClient(Ticket idToDisconnect)
     {
         try
         {
-            if (Active.EqualsTicket(disc_id))
+            if (Active.EqualsTicket(idToDisconnect))
             {
                 Active = LocalComputer;
             }
-            var index = remoteClients.FindIndex(s => s.Ticket == disc_id);
-            if (index != -1)
+            var index = remoteClients.FindIndex(s => s.Ticket == idToDisconnect);
+            if (index == -1)
             {
-                var name = remoteClients.ElementAt(index).Name;
-                remoteClients.RemoveAt(index);
-                Log.Information("Client {name}[{id}] disconnected. Number of connected clients: {Count}", name, disc_id.ID, remoteClients.Count);
+                Log.Error("VDM.DisconnectClient(\"{id}\") failed", idToDisconnect.ID);
+                return;
             }
-            else
-            {
-                Log.Error("VDM.DisconnectClient(\"{id}\") failed", disc_id.ID);
-            }
+            var clientToDisconnect = remoteClients.ElementAt(index);
+            remoteClients.RemoveAt(index);
+            Log.Information("Client {name}[{id}] disconnected. Number of connected clients: {Count}", clientToDisconnect.Name, idToDisconnect.ID, remoteClients.Count);
+
         }
-        catch (Exception ex_)
+        catch (Exception ex)
         {
-            Log.Error(ex_, "VDM.DisconnectClient() Exception");
+            Log.Error(ex, "VDM.DisconnectClient() Exception");
         }
     }
 
@@ -125,6 +124,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     #region HotkeyHandler
 
+
     public void KeyGesture(HotkeyType type)
     {
         Log.Debug("Pressed hotkey {a} ", type);
@@ -162,7 +162,10 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     protected void SwitchTo(Ticket monitorID)
     {
-        var newMon = remoteClients.Where(s => s.EqualsTicket(monitorID)).FirstOrDefault();
+        var newMon = remoteClients
+            .Append(LocalComputer) // REVIEW
+            .Where(s => s.EqualsTicket(monitorID))
+            .FirstOrDefault();
         if (newMon == default(IControllableComputer))
         {
             Log.Information("Switch to client number {id} failed.", monitorID);
@@ -175,17 +178,17 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     {
         if (!remoteClients.Any())
             return LocalComputer;
-        var primaryMonitor = Enumerable.Repeat(LocalComputer, 1);
-        var newMonitor = primaryMonitor
+        var server = Enumerable.Repeat(LocalComputer, 1);
+        var newMonitor = server
             .Concat(remoteClients)
-            .Concat(primaryMonitor)
+            .Concat(server)
             .SkipWhile(s => !s.Equals(Active))
             .Skip(1)
             .FirstOrDefault();
 
         if (newMonitor is null)
         {
-            Log.Error("Could not switch monitors.", Active.Ticket);
+            Log.Error("Could not switch computers", Active.Ticket);
             newMonitor = LocalComputer;
         }
         return newMonitor;
@@ -204,40 +207,25 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public Task<IEnumerable<Guid>> GetConnectedClients()
     {
-        var connectedClients = new List<Guid>();
-        var unreachableClients = new List<Ticket>();
-        foreach (var client in remoteClients)
-        {
-            if (client.TrySendHeartbeat())
-            {
-                connectedClients.Add(client.ID);
-            }
-            else
-            {
-                unreachableClients.Add(client.Ticket);
-            }
-        }
-        unreachableClients.ForEach(ticket => DisconnectClient(ticket));
-        return Task.FromResult(connectedClients.AsEnumerable());
+        UpdateRemoteClients();
+        return Task.FromResult(remoteClients.Select(cl => cl.ID));
     }
 
     public Task<bool> HearbeatAnyClientIsSuccessful()
     {
-        var atLeastOneIsHealthy = false;
-        var unreachableClients = new List<Ticket>();
-        foreach (var client in remoteClients)
-        {
-            if (client.TrySendHeartbeat())
-            {
-                atLeastOneIsHealthy = true;
-            }
-            else
-            {
-                Log.Debug("Client {TO}[{index}] is considered unreachable/non-responsive.", client.Name, client.Ticket.ID);
-                unreachableClients.Add(client.Ticket);
-            }
-        }
-        unreachableClients.ForEach(ticket => DisconnectClient(ticket));
+        this.UpdateRemoteClients();
+        var atLeastOneIsHealthy = remoteClients.Count > 0;
         return Task.FromResult(atLeastOneIsHealthy);
+    }
+    private void UpdateRemoteClients()
+    {
+        var unreachableClients = remoteClients
+            .Where(cl => !cl.TrySendHeartbeat())
+            .ToList();
+        unreachableClients.ForEach(client =>
+        {
+            Log.Debug("Client {TO}[{index}] is considered unreachable/non-responsive.", client.Name, client.Ticket.ID);
+            DisconnectClient(client.Ticket); // ~ remoteClient.Remove
+        });
     }
 }
