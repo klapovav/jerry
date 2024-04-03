@@ -37,8 +37,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
             _ => new BaseDesktopManager(onActiveChanged),
         };
 
-        double v = 3.1;
-        Log.Information("Version: {Version}", v);
+        //Log.Information("Version: {Version}", this.CurrentVersion);
         Log.Information("Mode: {Mode}", mode);
 
         _jobs = new BlockingCollection<Task>(300);

@@ -119,7 +119,7 @@ public class Client : IControllableComputer
         var msg = message?.ClipboardSession?.Message;
 
         bool updateJerryClipboard;
-        if (msg == null || msg.Length == 0)
+        if (string.IsNullOrEmpty(msg))
         {
             Log.Debug("Client sent an empty clipboard content. The content of the clipboard hasn't been modified during the previous session, " +
                         "or it has been replaced with a format that is not supported.", clipboard.Message);

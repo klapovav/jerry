@@ -5,6 +5,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ClipboardData = Common.Clipboard;
@@ -22,25 +23,19 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         get { return _active; }
         private set
         {
-            if (_active is not null)
+            if (_active?.OnDeactivate(out ClipboardData clipboard) == true)
             {
-                if (_active.OnDeactivate(out ClipboardData clipboard))
-                {
-                    Log.Debug("Jerry clipboard length: {0}", clipboard.Message.Length);
-                    SessionClipData = clipboard;
-                }
+                Log.Debug("Jerry clipboard length: {0}", clipboard.Message.Length);
+                SessionClipData = clipboard;
             }
-
-            if (value.Equals(LocalComputer))
-                OnActiveChanged?.Invoke(Strategy.Local);
-            else
-                OnActiveChanged?.Invoke(Strategy.Remote);
+            var newStrategy = value.Equals(LocalComputer) ? Strategy.Local : Strategy.Remote;
+            OnActiveChanged?.Invoke(newStrategy);
             _active = value;
             _active.OnActivate(SessionClipData);
         }
     }
 
-    public string CurrentVersion => "0.1.xx";
+    public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
     public IMouseKeyboardEventHandler Subscriber { get; set; } = null;
     public virtual Mode Mode => Mode.Basic;
     public Action<Strategy> OnActiveChanged { get; }
@@ -116,10 +111,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public virtual void OnMouseEvent(Events.MouseDeltaMove mouseMove)
     {
-        if (Subscriber is not null)
-        {
-            Subscriber?.OnMouseEvent(mouseMove);
-        }
+        Subscriber?.OnMouseEvent(mouseMove);
 
         if (Active.Equals(LocalComputer))
         {
@@ -201,14 +193,9 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     #endregion HotkeyHandler
 
-    public void SetSubscriber(IMouseKeyboardEventHandler subscriber)
-    {
-        Subscriber ??= subscriber;
-    }
+    public void SetSubscriber(IMouseKeyboardEventHandler subscriber) => Subscriber ??= subscriber;
 
-    public void PoisonYourself()
-    {
-    }
+    public void PoisonYourself() { }
 
     public Task<bool> TrySendHeartbeat(Ticket id)
     {

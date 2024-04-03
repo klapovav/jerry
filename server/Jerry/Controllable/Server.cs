@@ -33,7 +33,7 @@ public class Server : IControllableComputer
 
     public bool OnDeactivate(out ClipboardData clipboard)
     {
-        if (LocalClipData != null && LocalClipData.Format == Format.Text)
+        if (LocalClipData?.Format == Format.Text)
             LocalClipData.Message = Clipboard.ClipboardText;
         clipboard = LocalClipData;
         return clipboard != null && clipboard != ServerClipData;
@@ -42,23 +42,23 @@ public class Server : IControllableComputer
     public void OnActivate(ClipboardData clipboard)
     {
         ServerClipData = clipboard;
+        LocalClipData = null;
 
-        if (clipboard is not null)
+        if (clipboard is null)
+            return;
+
+        if (clipboard.Format == Format.Text)
         {
-            if (clipboard.Format == Format.Text)
-            {
-                var a = ClipboardService.SetTextAsync(clipboard.Message);
-                Log.Debug("Clipboard content length: {msg}; ", clipboard.Message.Length);
-                Log.Debug("Clipboard[0..50]:  {msg}", clipboard.Message.Truncate(50));
-                a.Wait();
-            }
-            else
-            {
-                Log.Error("Clipboard filelist format [not implemented]: {msg} ", clipboard.Message);
-            }
+            var a = ClipboardService.SetTextAsync(clipboard.Message);
+            Log.Debug("Clipboard content length: {msg}; ", clipboard.Message.Length);
+            Log.Debug("Clipboard[0..50]:  {msg}", clipboard.Message.Truncate(50));
+            a.Wait();
+        }
+        else
+        {
+            Log.Error("Clipboard filelist format [not implemented]: {msg} ", clipboard.Message);
         }
 
-        LocalClipData = null;
     }
 
     private void OnClipboardChange(object sender, SharpClipboard.ClipboardChangedEventArgs e)
@@ -67,7 +67,6 @@ public class Server : IControllableComputer
         switch (e.ContentType)
         {
             case SharpClipboard.ContentTypes.Files:
-
                 #region UNDONE
 
                 var files = string.Join("\n", Clipboard.ClipboardFiles);
@@ -79,9 +78,7 @@ public class Server : IControllableComputer
                 };
 
                 #endregion UNDONE
-
                 break;
-
             case SharpClipboard.ContentTypes.Text:
                 //REVIEW e.Content.ToString() ~ Clipboard.ClipboardText
                 LocalClipData.Format = Format.Text;
