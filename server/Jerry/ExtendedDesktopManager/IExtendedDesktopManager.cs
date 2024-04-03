@@ -42,17 +42,17 @@ public interface IClientManager
     /// <returns>Returns true if there are still connected clients</returns>
     Task<bool> HearbeatAnyClientIsSuccessful();
 }
-
-public interface IMouseKeyboardEventHandler
+public interface IInputSubscriber
 {
-    void OnKeyboardEvent(Events.KeyboardHookEvent key);
-
     void OnMouseEvent(Events.MouseButton ev);
 
     void OnMouseEvent(Events.MouseDeltaMove mouseMove);
 
     void OnMouseEvent(Events.MouseWheel ev);
-
+    void OnKeyboardEvent(Events.KeyboardHookEvent key);
+}
+public interface IMouseKeyboardEventHandler : IInputSubscriber
+{
     void ReleaseModifiers(ModifierKeys modifiers);
 }
 

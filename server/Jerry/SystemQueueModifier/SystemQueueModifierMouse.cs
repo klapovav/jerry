@@ -5,34 +5,23 @@ using Serilog;
 
 namespace Jerry.SystemQueueModifier;
 
-internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseInputType>
+internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseInput>
 {
-    public event OnMouseMoveEventHandler OnMouseMove;
-
-    public event OnMouseWheelEventHandler OnMouseWheel;
-
-    public event OnMouseButtonEventHandler OnMouseButton;
-
-    public delegate FilterResult OnMouseMoveEventHandler(Events.MouseDeltaMove deltaMove);
-
-    public delegate FilterResult OnMouseWheelEventHandler(Events.MouseWheel mouseWheel);
-
-    public delegate FilterResult OnMouseButtonEventHandler(Events.MouseButton mouseButton);
-
     private KeyboardSyncSupervisor buttonSyncSupervisor;
     private CursorPosSyncSupervisor cursorSyncSupervisor;
-
     public override bool AllKeysAreReleased => buttonSyncSupervisor.AllKeysAreReleased();
     protected override IHook hook => MouseHook;
     private MouseHook MouseHook;
+    private IInputSubscriber subscriber;
 
-    public SystemQueueModifierMouse(MouseInputType noneEvent) : base(noneEvent)
+    public SystemQueueModifierMouse(MouseInput noneEvent, IInputSubscriber subscriber) : base(noneEvent)
     {
         var mouseHook = new MouseHook();
         mouseHook.OnMouseButton += MouseHook_OnMouseButton;
         mouseHook.OnMouseMove += MouseHook_OnMouseMove;
         mouseHook.OnMouseWheel += MouseHook_OnMouseWheel;
         MouseHook = mouseHook;
+        this.subscriber = subscriber;
     }
 
     protected override void InstallHook()
@@ -47,9 +36,9 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
 
     private FilterResult MouseHook_OnMouseWheel(Events.MouseWheel mouseWheel)
     {
-        var controllerOSResponse = OnMouseWheel?.Invoke(mouseWheel) ?? FilterResult.Keep;
+        subscriber.OnMouseEvent(mouseWheel);
 
-        var stopPropagation = BlockedInputTypes.HasFlag(MouseInputType.Wheel);
+        var stopPropagation = BlockedInputTypes.HasFlag(MouseInput.Wheel);
 
         return stopPropagation
             ? FilterResult.Discard
@@ -70,8 +59,8 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
             Log.Debug("[X] SQM.MouseMove discarded. Event injected by another app");
             return FilterResult.Discard;
         }
-        var controllerOSResponse = OnMouseMove?.Invoke(ev) ?? FilterResult.Keep;
-        var stopPropagation = BlockedInputTypes.HasFlag(MouseInputType.Move);
+        subscriber.OnMouseEvent(ev);
+        var stopPropagation = BlockedInputTypes.HasFlag(MouseInput.Move);
         if (!stopPropagation)
         {
             cursorSyncSupervisor.ExpectMsgInSystemQueue();
@@ -87,12 +76,14 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
 
     private FilterResult MouseHook_OnMouseButton(Events.MouseButton mouseButton)
     {
-        var controllerOSResponse = OnMouseButton?.Invoke(mouseButton) ?? FilterResult.Keep;
+        subscriber.OnMouseEvent(mouseButton);
         var stopPropagation = mouseButton.IsDown
-            ? BlockedInputTypes.HasFlag(MouseInputType.ButtonDown)
-            : BlockedInputTypes.HasFlag(MouseInputType.ButtonUp);
+            ? BlockedInputTypes.HasFlag(MouseInput.ButtonDown)
+            : BlockedInputTypes.HasFlag(MouseInput.ButtonUp);
 
-        return controllerOSResponse;
+        return stopPropagation
+        ? FilterResult.Discard
+        : FilterResult.Keep;
     }
 
     public void Dispose()
@@ -102,5 +93,6 @@ internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseIn
         MouseHook.OnMouseWheel -= MouseHook_OnMouseWheel;
         MouseHook.Dispose();
         MouseHook = null;
+        subscriber = null;
     }
 }

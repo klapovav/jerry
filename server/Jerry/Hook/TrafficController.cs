@@ -1,5 +1,7 @@
+using Jerry.Events;
 using Jerry.Hotkey;
 using Jerry.SystemQueueModifier;
+using Master;
 using Serilog;
 using System;
 
@@ -13,7 +15,7 @@ public enum Strategy : int
     TransitionToLocal = 3
 }
 
-public class TrafficController : IDisposable
+public class TrafficController : IDisposable, IInputSubscriber
 {
     private readonly IMouseKeyboardEventHandler uiHandler;
     private readonly IGlobalHotkeyHandler hotkeyHandler;
@@ -23,9 +25,7 @@ public class TrafficController : IDisposable
     private Strategy traffic_rules;
     private readonly (bool, bool) LOCAL = (true, false);
     private readonly (bool, bool) REMOTE = (false, true);
-    private readonly (bool, bool)[] KeyDownStrategy = new (bool, bool)[4];
-    private readonly (bool, bool)[] KeyUpStrategy = new (bool, bool)[4];
-    private readonly (bool, bool)[] DefaultStrategy = new (bool, bool)[4];
+
 
     public TrafficController(IExtendedDesktopManager desktopManager)
     {
@@ -35,35 +35,16 @@ public class TrafficController : IDisposable
         lowLevelKeyboardState = new LowLevelKeyboardState();
         eventThrottle = new HotkeyEventThrottle();
 
-        systemQueueModifier = new();
-        systemQueueModifier.Mouse.OnMouseMove += SystemQueueModifier_OnMouseMove;
-        systemQueueModifier.Mouse.OnMouseButton += SystemQueueModifier_OnMouseButton;
-        systemQueueModifier.Mouse.OnMouseWheel += SystemQueueModifier_OnMouseWheel;
+        systemQueueModifier = new(this);
 
-        systemQueueModifier.Keyboard.OnKeyboardEvent += SystemQueueModifier_OnKeyboardEvent;
-
-        DefaultStrategy[(int)Strategy.Local] = LOCAL;
-        DefaultStrategy[(int)Strategy.Remote] = REMOTE;
-        DefaultStrategy[(int)Strategy.TransitionToRemote] = REMOTE;
-        DefaultStrategy[(int)Strategy.TransitionToLocal] = LOCAL;
-
-        KeyDownStrategy[(int)Strategy.Local] = LOCAL;
-        KeyDownStrategy[(int)Strategy.Remote] = REMOTE;
-        KeyDownStrategy[(int)Strategy.TransitionToRemote] = REMOTE;
-        KeyDownStrategy[(int)Strategy.TransitionToLocal] = LOCAL;
-
-        KeyUpStrategy[(int)Strategy.Local] = LOCAL;
-        KeyUpStrategy[(int)Strategy.Remote] = REMOTE;
-        KeyUpStrategy[(int)Strategy.TransitionToRemote] = (true, true);
-        KeyUpStrategy[(int)Strategy.TransitionToLocal] = LOCAL;
 
         TrafficRules = Strategy.Local;
         uiHandler = desktopManager;
     }
 
-    #region -------   Handle Hook Callback -------------------
+    #region -------   Hook Callback -------------------
 
-    private FilterResult SystemQueueModifier_OnKeyboardEvent(Events.KeyboardHookEvent ke)
+    public void OnKeyboardEvent(Events.KeyboardHookEvent ke)
     {
         TryEndTransition();
         lowLevelKeyboardState.KeyEvent(ke.KeyCode, ke.Pressed);
@@ -75,7 +56,6 @@ public class TrafficController : IDisposable
             {
                 lowLevelKeyboardState.ReleaseModifiers();
                 uiHandler.ReleaseModifiers(sysgesture.Modifiers);
-                return FilterResult.Discard;
             }
             // Jerry keyboard shortcut
             if (lowLevelKeyboardState.HotkeyEvent(ke.KeyCode, out JerryKeyGesture gesture))
@@ -83,62 +63,49 @@ public class TrafficController : IDisposable
                 if (gesture.Purpose == HotkeyType.SwitchDestination)
                 {
                     _ = eventThrottle.TryInvoke(hotkeyHandler);
-                    return FilterResult.Discard;
                 }
                 else
                 {
                     hotkeyHandler.KeyGesture(gesture.Purpose);
-                    return FilterResult.Discard;
                 }
             }
         }
 
-        var (passEvent, sendToRemote) = GetKeyStrategy(ke.Pressed);
+        var (_passEvent, sendToRemote) = GetKeyStrategy(ke.Pressed);
         if (sendToRemote)
         {
             uiHandler.OnKeyboardEvent(ke);
         }
 
-        return passEvent ?
-            FilterResult.Keep :
-            FilterResult.Discard;
+        
     }
-
-    private FilterResult SystemQueueModifier_OnMouseWheel(Events.MouseWheel mouseWheel)
+    [Obsolete]
+    public void OnMouseEvent(MouseButton ev)
     {
-        var (passEvent, sendToRemote) = GetStrategy(mouseWheel);
+        TryEndTransition();
+        var (passEvent, sendToRemote) = GetStrategy(ev);
+
+        if (sendToRemote)
+            uiHandler.OnMouseEvent(ev);
+    }
+    [Obsolete]
+    public void OnMouseEvent(MouseDeltaMove mouseMove)
+    {
+        TryEndTransition();
+
+        var (_, sendToRemote) = StatelessEventsStrategy();
+
+        if (sendToRemote)
+            uiHandler.OnMouseEvent(mouseMove);
+    }
+    [Obsolete]
+    public void OnMouseEvent(Events.MouseWheel mouseWheel)
+    {
+        var (_, sendToRemote) = GetStrategy(mouseWheel);
         if (sendToRemote)
             uiHandler.OnMouseEvent(mouseWheel);
-        return passEvent ?
-            FilterResult.Keep :
-            FilterResult.Discard;
     }
 
-    private FilterResult SystemQueueModifier_OnMouseButton(Events.MouseButton mouseButton)
-    {
-        TryEndTransition();
-        var (passEvent, sendToRemote) = GetStrategy(mouseButton);
-
-        if (sendToRemote)
-            uiHandler.OnMouseEvent(mouseButton);
-        return passEvent ?
-            FilterResult.Keep :
-            FilterResult.Discard;
-    }
-
-    private FilterResult SystemQueueModifier_OnMouseMove(Events.MouseDeltaMove deltaMove)
-    {
-        TryEndTransition();
-
-        var (passEvent, sendToRemote) = DefaultStrategy[(int)TrafficRules];
-
-        if (sendToRemote)
-            uiHandler.OnMouseEvent(deltaMove);
-
-        return passEvent ?
-            FilterResult.Keep :
-            FilterResult.Discard;
-    }
 
     #endregion -------   Handle Hook Callback -------------------
 
@@ -157,20 +124,21 @@ public class TrafficController : IDisposable
                 case Strategy.TransitionToLocal:
                     DispatcherProvider.HookCallbackDispatcher.Invoke(() =>
                     {
-                        systemQueueModifier.KeepInputTypes(KeyboardInputType.All);
-                        systemQueueModifier.KeepInputTypes(MouseInputType.All);
-                        systemQueueModifier.Unsubscribe(KeyboardInputType.All);
-                        systemQueueModifier.Unsubscribe(MouseInputType.All);
+                        systemQueueModifier.KeepInput(KeyboardInput.All);
+                        systemQueueModifier.KeepInput(MouseInput.All);
+                        systemQueueModifier.Unsubscribe(KeyboardInput.All);
+                        systemQueueModifier.Unsubscribe(MouseInput.All);
                     });
                     break;
 
                 case Strategy.TransitionToRemote:
                     DispatcherProvider.HookCallbackDispatcher.Invoke(() =>
                     {
-                        systemQueueModifier.BlockInputTypes(KeyboardInputType.KeyDown);
-                        systemQueueModifier.BlockInputTypes(MouseInputType.All);
-                        systemQueueModifier.Subscribe(KeyboardInputType.All);
-                        systemQueueModifier.Subscribe(MouseInputType.All);
+                        systemQueueModifier.BlockInput(KeyboardInput.KeyDown);
+                        systemQueueModifier.BlockInput(MouseInput.All);
+                        systemQueueModifier.KeepInput(MouseInput.ButtonUp);
+                        systemQueueModifier.Subscribe(KeyboardInput.All);
+                        systemQueueModifier.Subscribe(MouseInput.All);
                     });
                     //cursorPositionChecker.Start();
                     break;
@@ -178,8 +146,8 @@ public class TrafficController : IDisposable
                 case Strategy.Remote:
                     DispatcherProvider.HookCallbackDispatcher.Invoke(() =>
                     {
-                        systemQueueModifier.BlockInputTypes(KeyboardInputType.All);
-                        systemQueueModifier.BlockInputTypes(MouseInputType.All);
+                        systemQueueModifier.BlockInput(KeyboardInput.All);
+                        systemQueueModifier.BlockInput(MouseInput.All);
                     });
                     break;
             }
@@ -194,8 +162,8 @@ public class TrafficController : IDisposable
         {
             if (eventThrottle.TryInvoke(hotkeyHandler))
             {
-                systemQueueModifier.Subscribe(KeyboardInputType.All);
-                systemQueueModifier.Subscribe(MouseInputType.All);
+                systemQueueModifier.Subscribe(KeyboardInput.All);
+                systemQueueModifier.Subscribe(MouseInput.All);
             }
         });
     }
@@ -218,10 +186,10 @@ public class TrafficController : IDisposable
     {
         return (TrafficRules) switch
         {
-            Strategy.Local => (true, false),
-            Strategy.Remote => (false, true),
-            Strategy.TransitionToRemote => (false, true),
-            Strategy.TransitionToLocal => (true, false),
+            Strategy.Local => LOCAL,
+            Strategy.Remote => REMOTE,
+            Strategy.TransitionToRemote => REMOTE,
+            Strategy.TransitionToLocal => LOCAL,
             _ => throw new NotImplementedException(),
         };
     }
@@ -259,4 +227,6 @@ public class TrafficController : IDisposable
     }
 
     public void Dispose() => systemQueueModifier.Dispose();
+
+
 }

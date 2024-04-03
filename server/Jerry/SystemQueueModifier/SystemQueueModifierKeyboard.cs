@@ -3,28 +3,25 @@ using Jerry.Hook;
 
 namespace Jerry.SystemQueueModifier;
 
-internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<KeyboardInputType>
+internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<KeyboardInput>
 {
     private KeyboardHook KeyboardHook;
     private KeyboardSyncSupervisor keyboardState;
-
-    public event OnKeyboardEventHandler OnKeyboardEvent;
-
-    public delegate FilterResult OnKeyboardEventHandler(KeyboardHookEvent keyboardHookEvent);
-
-    public SystemQueueModifierKeyboard(KeyboardInputType noneEvent) : base(noneEvent)
+    private IInputSubscriber subscriber;
+    public SystemQueueModifierKeyboard(KeyboardInput noneEvent, IInputSubscriber subscriber) : base(noneEvent)
     {
         KeyboardHook = new KeyboardHook();
         KeyboardHook.OnKeyboardEvent += LL_KeyboardHook_OnKeyboardEvent;
+        this.subscriber = subscriber;
     }
 
     private FilterResult LL_KeyboardHook_OnKeyboardEvent(KeyboardHookEvent keyboardEvent)
     {
-        var controllerOSResponse = OnKeyboardEvent?.Invoke(keyboardEvent) ?? FilterResult.Keep;
+        subscriber.OnKeyboardEvent(keyboardEvent);
 
         var stopPropagation = keyboardEvent.Pressed
-            ? BlockedInputTypes.HasFlag(KeyboardInputType.KeyDown)
-            : BlockedInputTypes.HasFlag(KeyboardInputType.KeyUp);
+            ? BlockedInputTypes.HasFlag(KeyboardInput.KeyDown)
+            : BlockedInputTypes.HasFlag(KeyboardInput.KeyUp);
         //AssertEqualResponse(controllerOSResponse, stopPropagation,
         //"Key " + keyboardEvent.Key.ToString() + keyboardEvent.KeyState.ToString());
 
@@ -50,5 +47,6 @@ internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<Keyb
         KeyboardHook.OnKeyboardEvent -= LL_KeyboardHook_OnKeyboardEvent;
         KeyboardHook.Dispose();
         KeyboardHook = null;
+        subscriber = null;
     }
 }

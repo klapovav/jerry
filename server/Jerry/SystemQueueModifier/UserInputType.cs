@@ -3,7 +3,7 @@
 namespace Jerry.SystemQueueModifier;
 
 [Flags]
-public enum MouseInputType
+public enum MouseInput
 {
     None = 0,
     Move = 1,
@@ -15,7 +15,7 @@ public enum MouseInputType
 }
 
 [Flags]
-public enum KeyboardInputType
+public enum KeyboardInput
 {
     None = 0,
     KeyUp = 1,
