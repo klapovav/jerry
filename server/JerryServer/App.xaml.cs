@@ -1,6 +1,8 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Jerry;
 using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Shared.WinApi;
 using System;
@@ -15,21 +17,24 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        var lvlSwitch = LoggerInitialization();
+        DispatcherProvider.Init(Current.Dispatcher, lvlSwitch);
         base.OnStartup(e);
-        LoggerInitialization();
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         SetCurrentThreadExtra(Jerry.Constants.JerryServerID);
-        DispatcherProvider.Init(Current.Dispatcher);
         trayIcon = (TaskbarIcon)FindResource("JTrayIcon");
     }
 
-    private static void LoggerInitialization()
+    private static LoggingLevelSwitch LoggerInitialization()
     {
+        var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Information);
+
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.ControlledBy(levelSwitch)
             .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}{Exception}")
             .WriteTo.File("log/", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}{Exception}")
             .CreateLogger();
+        return levelSwitch;
     }
 
     private void SetCurrentThreadExtra(UInt16 id)

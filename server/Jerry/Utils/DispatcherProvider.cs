@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog.Core;
+using System;
 using System.Windows.Threading;
 
 namespace Jerry;
@@ -11,22 +12,24 @@ public static class Constants
 
 public sealed class DispatcherProvider
 {
-    private DispatcherProvider(Dispatcher UIDispatcher)
+    private DispatcherProvider(Dispatcher UIDispatcher, LoggingLevelSwitch s)
     {
         uiDispatcher = UIDispatcher;
+        lls = s;
     }
-
+    private readonly LoggingLevelSwitch lls = null;
     private static DispatcherProvider instance = null;
     private readonly Dispatcher uiDispatcher;
 
-    public static void Init(Dispatcher hookCallbackDispatcher)
+    public static void Init(Dispatcher hookCallbackDispatcher, LoggingLevelSwitch s)
     {
         if (hookCallbackDispatcher is null) { throw new ArgumentNullException(nameof(hookCallbackDispatcher)); }
 
         if (instance is not null)
             throw new InvalidOperationException();
-        instance = new DispatcherProvider(hookCallbackDispatcher);
+        instance = new DispatcherProvider(hookCallbackDispatcher, s);
     }
 
     public static Dispatcher HookCallbackDispatcher => instance?.uiDispatcher ?? throw new InvalidOperationException();
+    public static LoggingLevelSwitch LoggingLevelSwitch => instance?.lls ?? throw new InvalidOperationException();
 }

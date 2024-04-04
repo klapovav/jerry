@@ -93,7 +93,7 @@ public class CommunicationLayer : IDisposable
         {
             FailureCount++;
             if (FailureCount == 1)
-                Log.Warning($"Failed to send data {e.Message}");
+                Log.Warning($"{e.Message}");
             return false;
         }
     }

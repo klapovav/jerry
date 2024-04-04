@@ -5,4 +5,5 @@ public enum HotkeyType
     SwitchToServer,
     SwitchDestination,
     SwitchMouseMove,
+    SwitchLoggingLevel,
 }

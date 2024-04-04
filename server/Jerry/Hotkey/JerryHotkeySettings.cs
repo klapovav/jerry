@@ -1,6 +1,7 @@
 using NHotkey;
 using Serilog;
 using System;
+using System.Windows.Input;
 
 namespace Jerry.Hotkey;
 
@@ -8,6 +9,7 @@ public sealed class JerryHotkeySettings
 {
     private static readonly Lazy<JerryHotkeySettings> lazy = new(() => new JerryHotkeySettings());
     public HotkeyRegistration SwitchMonitor { get; init; }
+    public HotkeyRegistration SwitchLoggingLevel { get; init; }
     public JerryKeyGesture SwitchHome { get; }
     public JerryKeyGesture SwitchMouseMode { get; }
 
@@ -20,6 +22,7 @@ public sealed class JerryHotkeySettings
         var settings = new ConfigurationManager.AppSettings().Load();
 
         SwitchMonitor = new HotkeyRegistration(HotkeyType.SwitchDestination, settings.SwitchMonitor, OnSwitchMonitor);
+        SwitchLoggingLevel = new HotkeyRegistration(HotkeyType.SwitchLoggingLevel, new(HotkeyType.SwitchLoggingLevel, Key.NumPad5, ModifierKeys.Control | ModifierKeys.Alt), OnSwitchLoggingLevel);
         SwitchHome = settings.SwitchHome;
         SwitchMouseMode = settings.SwitchMouseMove;
 
@@ -32,6 +35,30 @@ public sealed class JerryHotkeySettings
         Log.Information("Press {0} to turn relative movement on/off",
                     SwitchMouseMode.GetDisplayStringForCulture(null)
                     );
+    }
+
+    private void OnSwitchLoggingLevel(object sender, HotkeyEventArgs e)
+    {
+        switch (DispatcherProvider.LoggingLevelSwitch.MinimumLevel)
+        {
+            case Serilog.Events.LogEventLevel.Verbose:
+                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+                break;
+            case Serilog.Events.LogEventLevel.Debug:
+                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+                break;
+            case Serilog.Events.LogEventLevel.Information:
+                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
+                break;
+            case Serilog.Events.LogEventLevel.Warning:
+                break;
+            case Serilog.Events.LogEventLevel.Error:
+                break;
+            case Serilog.Events.LogEventLevel.Fatal:
+                break;
+            default:
+                break;
+        }
     }
 
     public static JerryHotkeySettings Instance
