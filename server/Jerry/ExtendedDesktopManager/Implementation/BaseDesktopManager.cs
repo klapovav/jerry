@@ -14,7 +14,7 @@ namespace Jerry.ExtendedDesktopManager;
 
 internal class BaseDesktopManager : IExtendedDesktopManager
 {
-    private ClipboardData SessionClipData { get; set; }
+    private ClipboardData GlobalClipboard { get; set; }
     protected Server LocalComputer { get; }
     private readonly List<IControllableComputer> remoteClients = new();
     private IControllableComputer _active;
@@ -25,13 +25,13 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         {
             if (_active?.OnDeactivate(out ClipboardData clipboard) == true)
             {
-                Log.Debug("Jerry clipboard length: {0}", clipboard.Message.Length);
-                SessionClipData = clipboard;
+                Log.Debug("Global clipboard length: {0}", clipboard.Message.Length);
+                GlobalClipboard = clipboard;
             }
             var newStrategy = value.Equals(LocalComputer) ? Strategy.Local : Strategy.Remote;
             OnActiveChanged?.Invoke(newStrategy);
             _active = value;
-            _active.OnActivate(SessionClipData);
+            _active.OnActivate(GlobalClipboard);
         }
     }
 

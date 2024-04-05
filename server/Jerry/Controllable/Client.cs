@@ -1,6 +1,7 @@
 using Jerry.Connection;
 using Jerry.Connection.Gatekeeper;
 using Jerry.Coordinates;
+using Jerry.Extensions;
 using Master;
 using Serialization;
 using Serilog;
@@ -118,17 +119,10 @@ public class Client : IControllableComputer
 
         var msg = message?.ClipboardSession?.Message;
 
-        bool updateJerryClipboard;
-        if (string.IsNullOrEmpty(msg))
+        bool updateJerryClipboard = !string.IsNullOrEmpty(msg);
+        if (updateJerryClipboard)
         {
-            Log.Debug("Client sent an empty clipboard content. The content of the clipboard hasn't been modified during the previous session, " +
-                        "or it has been replaced with a format that is not supported.", clipboard.Message);
-            updateJerryClipboard = false;
-        }
-        else
-        {
-            Log.Debug("Jerry clipboard updated {}", clipboard.Message);
-            updateJerryClipboard = true;
+            Log.Debug("Global clipboard content changed:{} | content[0..50]: {}", updateJerryClipboard, clipboard.Message.Truncate(50));
         }
         comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
         return updateJerryClipboard;

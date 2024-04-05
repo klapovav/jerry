@@ -18,8 +18,8 @@ public class Server : IControllableComputer
     public string OS => "Windows";
     public LocalCoordinate CursorPosition { get; private set; }
     public Ticket Ticket { get; }
-    private ClipboardData LocalClipData { get; set; }
-    private ClipboardData ServerClipData { get; set; }
+    private ClipboardData SessionClipboard { get; set; }
+    private ClipboardData GlobalClipboard { get; set; }
 
     public Server(Ticket sessionID)
     {
@@ -33,16 +33,16 @@ public class Server : IControllableComputer
 
     public bool OnDeactivate(out ClipboardData clipboard)
     {
-        if (LocalClipData?.Format == Format.Text)
-            LocalClipData.Message = Clipboard.ClipboardText;
-        clipboard = LocalClipData;
-        return clipboard != null && clipboard != ServerClipData;
+        if (SessionClipboard?.Format == Format.Text)
+            SessionClipboard.Message = Clipboard.ClipboardText;
+        clipboard = SessionClipboard;
+        return clipboard != null && clipboard != GlobalClipboard;
     }
 
     public void OnActivate(ClipboardData clipboard)
     {
-        ServerClipData = clipboard;
-        LocalClipData = null;
+        GlobalClipboard = clipboard;
+        SessionClipboard = null;
 
         if (clipboard is null)
             return;
@@ -50,8 +50,8 @@ public class Server : IControllableComputer
         if (clipboard.Format == Format.Text)
         {
             var a = ClipboardService.SetTextAsync(clipboard.Message);
-            Log.Debug("Clipboard content length: {msg}; ", clipboard.Message.Length);
-            Log.Debug("Clipboard[0..50]:  {msg}", clipboard.Message.Truncate(50));
+            Log.Debug("Local clipboard content length: {msg}; ", clipboard.Message.Length);
+            Log.Debug("Local clipboard[0..50]:  {msg}", clipboard.Message.Truncate(50));
             a.Wait();
         }
         else
@@ -63,7 +63,7 @@ public class Server : IControllableComputer
 
     private void OnClipboardChange(object sender, SharpClipboard.ClipboardChangedEventArgs e)
     {
-        LocalClipData ??= new ClipboardData() { Format = Format.File };
+        SessionClipboard ??= new ClipboardData() { Format = Format.File };
         switch (e.ContentType)
         {
             case SharpClipboard.ContentTypes.Files:
@@ -71,7 +71,7 @@ public class Server : IControllableComputer
 
                 var files = string.Join("\n", Clipboard.ClipboardFiles);
                 Log.Debug("Clipboard content changed - [Files] [{number}]: {new}", Clipboard.ClipboardFiles.Count, files);
-                LocalClipData = new ClipboardData()
+                SessionClipboard = new ClipboardData()
                 {
                     Format = Format.File,
                     Message = string.Join("\n", Clipboard.ClipboardFiles)
@@ -81,7 +81,7 @@ public class Server : IControllableComputer
                 break;
             case SharpClipboard.ContentTypes.Text:
                 //REVIEW e.Content.ToString() ~ Clipboard.ClipboardText
-                LocalClipData.Format = Format.Text;
+                SessionClipboard.Format = Format.Text;
                 break;
 
             default:
