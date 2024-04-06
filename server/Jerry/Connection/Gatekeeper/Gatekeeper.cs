@@ -63,7 +63,7 @@ public class Gatekeeper : IDisposable
 
         var encryptor = new Encryptor(output_key);
         var decryptor = new Encryptor(input_key);
-        var layer = new CommunicationLayer(stream, encryptor, decryptor, false);  //DEBUG  encryption on/off
+        var layer = new CommunicationLayer(stream, encryptor, decryptor, true);  //DEBUG  encryption on/off
         var result = Handshake(layer, out var acceptedClient);
         layer.SendConnectionResult(result);
 

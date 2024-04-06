@@ -15,7 +15,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread::JoinHandle;
 use tracing::{error, info, trace, Level};
 
-const ENCRYPT: bool = false;
+const ENCRYPT: bool = true;
 const DEFAULT_PORT: u16 = 8888;
 const JERRY_CLIENT_ID: usize = 23889;
 const CONFIGURATION_FILE: &str = "jerry_client.toml";
