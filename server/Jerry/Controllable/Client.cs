@@ -7,6 +7,8 @@ using Serialization;
 using Serilog;
 using Slave;
 using System;
+using System.Diagnostics;
+using System.Security.Policy;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -17,7 +19,11 @@ public class Client : IControllableComputer
     private readonly CommunicationLayer comLayer;
     private readonly ClientValidInfo clientInfo;
     private readonly ScreenSimple primaryMonitor;
-    private bool relative_move = false;
+    private bool relativeMove = false;
+    private Stopwatch lastMoveSend = new Stopwatch();
+    private Vector groupedMove = new Vector(0, 0);
+    private const ushort MAX_POLLING_RATE = 125; // TODO configuration
+    private const double groupingInterval = 1000.0 / MAX_POLLING_RATE;
 
     public Client(CommunicationLayer layer, Ticket sessionID, ClientValidInfo info)
     {
@@ -25,8 +31,8 @@ public class Client : IControllableComputer
         clientInfo = info;
         Ticket = sessionID;
         primaryMonitor = new ScreenSimple(info.Resolution, info.Name);
-
         CursorPosition = new LocalCoordinate(info.Cursor.X, info.Cursor.Y);
+        lastMoveSend.Start();
     }
 
     public string Name => clientInfo.Name;
@@ -41,10 +47,10 @@ public class Client : IControllableComputer
     {
         int x;
         int y;
-        if (relative_move)
+        if (relativeMove)
         {
-            x = dx;
-            y = dy;
+            groupedMove += new Vector(dx, dy);
+            SendConditionally(groupedMove.DX, groupedMove.DY);
         }
         else
         {
@@ -53,8 +59,18 @@ public class Client : IControllableComputer
             y = Math.Max(0, CursorPosition.Y + dy);
             y = Math.Min(y, primaryMonitor.Position.Height);// - 1);
             CursorPosition = new LocalCoordinate(x, y);
+            SendConditionally(x, y);
         }
-        comLayer.TrySendMessage(comLayer.Factory.MouseMove(x, y));
+    }
+
+    private void SendConditionally(int x, int y)
+    {
+        if (lastMoveSend.ElapsedMilliseconds > groupingInterval)
+        {
+            comLayer.TrySendMessage(comLayer.Factory.MouseMove(x, y));
+            groupedMove = new Vector(0, 0); //REVIEW
+            lastMoveSend.Restart();
+        }
     }
 
     public void OnMouseClick(Events.MouseButton ev)
@@ -130,7 +146,7 @@ public class Client : IControllableComputer
 
     public void OnActivate(Common.Clipboard clipboard)
     {
-        comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relative_move));
+        comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relativeMove));
         if (clipboard is not null)
             comLayer.TrySendMessage(comLayer.Factory.ClipboardContent(clipboard.Message, clipboard.Format));
     }
@@ -138,8 +154,8 @@ public class Client : IControllableComputer
     public void ToogleMouseMode()
     {
         comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
-        relative_move = !relative_move;
-        comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relative_move));
+        relativeMove = !relativeMove;
+        comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relativeMove));
     }
 
     public void OnMouseWheel(MouseWheel wheel)
