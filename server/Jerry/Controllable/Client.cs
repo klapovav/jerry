@@ -19,10 +19,15 @@ public class Client : IControllableComputer
     private readonly CommunicationLayer comLayer;
     private readonly ClientValidInfo clientInfo;
     private readonly ScreenSimple primaryMonitor;
+    private readonly Stopwatch lastMoveSend = new();
     private bool relativeMove = false;
-    private Stopwatch lastMoveSend = new Stopwatch();
-    private Vector groupedMove = new Vector(0, 0);
-    private const ushort MAX_POLLING_RATE = 125; // TODO configuration
+    private Vector groupedMove = new(0, 0);
+    //FEAT 
+    // 1. configuration
+    // 2. debug hotkey
+    // 3. dynamic adaptation (LAN)
+    // 4. dynamic adatpation (client processing capability)
+    private const ushort MAX_POLLING_RATE = 125; 
     private const double groupingInterval = 1000.0 / MAX_POLLING_RATE;
 
     public Client(CommunicationLayer layer, Ticket sessionID, ClientValidInfo info)
@@ -107,11 +112,11 @@ public class Client : IControllableComputer
     {
         if ((Keys)keyEvent.KeyCode == Keys.LControlKey && keyEvent.ScanCode != 0x1D) //0x1D... LCtrl scancode,
         {
-            Log.Debug("Key: {ctrl} | User pressed AltGr", (Keys)keyEvent.KeyCode);
+            Log.Debug("Key: {ctrl} | AltGr", (Keys)keyEvent.KeyCode);
             return;
         }
-        var key_rep = GetLayoutIndependentKey(keyEvent);
-        var message = MessageFactory.KeyboardEvent(key_rep, keyEvent.Pressed);
+        var keyPosition = GetLayoutIndependentKey(keyEvent);
+        var message = MessageFactory.KeyboardEvent(keyPosition, keyEvent.Pressed);
         comLayer.TrySendMessage(message);
     }
 
@@ -158,10 +163,6 @@ public class Client : IControllableComputer
         comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relativeMove));
     }
 
-    public void OnMouseWheel(MouseWheel wheel)
-    {
-        throw new NotImplementedException();
-    }
 
     public bool TrySendHeartbeat()
     {

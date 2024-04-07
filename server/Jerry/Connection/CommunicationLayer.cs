@@ -16,7 +16,7 @@ public class CommunicationLayer : IDisposable
     private readonly NetworkStream networkStream;
     private readonly IEncDecryptor encryptor;
     private readonly IEncDecryptor decryptor;
-    private readonly bool encryption_on;
+    private readonly bool encryptionOn;
     public MessageFactory Factory { get; }
     public uint FailureCount { get; private set; }
 
@@ -27,7 +27,7 @@ public class CommunicationLayer : IDisposable
         networkStream.Socket.NoDelay = true;
         this.encryptor = encryptor;
         this.decryptor = decryptor;
-        encryption_on = encrypted;
+        encryptionOn = encrypted;
         Factory = new MessageFactory();
     }
 
@@ -125,7 +125,7 @@ public class CommunicationLayer : IDisposable
                 }
             }
             Log.Debug($"Response: {bytes.Count} bytes");
-            byte[] decoded = encryption_on ? decryptor.EncryptOrDecrypt(bytes.ToArray()) : bytes.ToArray();
+            byte[] decoded = encryptionOn ? decryptor.EncryptOrDecrypt(bytes.ToArray()) : bytes.ToArray();
             msg = SlaveMessage.Parser.ParseDelimitedFrom(new MemoryStream(decoded));
             return true;
         }
@@ -150,7 +150,7 @@ public class CommunicationLayer : IDisposable
         message.WriteDelimitedTo(ms);
         ms.Flush();
         //encryption
-        return encryption_on ? encryptor.EncryptOrDecrypt(ms.ToArray()) : ms.ToArray();
+        return encryptionOn ? encryptor.EncryptOrDecrypt(ms.ToArray()) : ms.ToArray();
     }
 
     public bool IsConnected()

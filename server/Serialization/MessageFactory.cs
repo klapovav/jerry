@@ -96,11 +96,11 @@ public class MessageFactory
     {
         var m = new MasterMessage();
 
-        var up_down = (pressed) ? State.Pressed : State.Released;
+        var keyState = (pressed) ? State.Pressed : State.Released;
         m.Keyboard = new Keyboard()
         {
             Key = key,
-            EventType = up_down,
+            EventType = keyState,
         };
         m.RndB = String.Empty;
         m.RndE = String.Empty;

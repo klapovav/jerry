@@ -50,9 +50,9 @@ internal class KeyboardSyncSupervisor
         previouslyPressed = new List<byte>();
     }
 
-    public static bool KeyIsVirtuallyDown(uint vk_code)
+    public static bool KeyIsLogicallyDown(uint virtualKeyCode)
     {
-        return Keyboard.GetKeyState((Keys)vk_code).Down;
+        return Keyboard.GetKeyState((Keys)virtualKeyCode).Down;
     }
 
     public void ExpectMsgInSystemQueue()
@@ -68,12 +68,12 @@ internal class KeyboardSyncSupervisor
             return false;
         }
         var stillPressed = previouslyPressed
-            .Where(vk => KeyIsVirtuallyDown(vk));
+            .Where(vk => KeyIsLogicallyDown(vk));
 
         previouslyPressed = stillPressed.Any()
             ? stillPressed
             : virtualKeys
-                .Where(vk => KeyIsVirtuallyDown(vk));
+                .Where(vk => KeyIsLogicallyDown(vk));
 
         Log();
         return !previouslyPressed.Any();

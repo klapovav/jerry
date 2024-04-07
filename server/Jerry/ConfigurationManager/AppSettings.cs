@@ -94,8 +94,8 @@ public class AppSettings : ISettingsManager, ISettingsProvider
     {
         try
         {
-            var toml_config_string = File.ReadAllText(SETTINGS_PATH);
-            var settings = Toml.ToModel<Settings>(toml_config_string);
+            var tomlConfigStr = File.ReadAllText(SETTINGS_PATH);
+            var settings = Toml.ToModel<Settings>(tomlConfigStr);
             var result = new List<ValidationResult>();
             var valid = Validator.TryValidateObject(settings, new ValidationContext(settings, null, null), result, true);
 

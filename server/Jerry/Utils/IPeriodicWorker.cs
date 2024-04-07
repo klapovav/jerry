@@ -21,13 +21,13 @@ internal class PeriodicWorker : IPeriodicWorker
     private CancellationTokenSource cancellationToken;
     private Task longRunningTask;
     private IPeriodicWorker.IntervalElapsedCallback job;
-    private int interval_ms;
+    private int intervalMillis;
     public bool IsRunning => longRunningTask?.Status == TaskStatus.Running;
 
 
     public void Start(IPeriodicWorker.IntervalElapsedCallback callback, int interval)
     {
-        interval_ms = interval;
+        intervalMillis = interval;
         job += callback;
         cancellationToken = new CancellationTokenSource();
         longRunningTask = Task.Factory.StartNew(
@@ -55,7 +55,7 @@ internal class PeriodicWorker : IPeriodicWorker
         {
             job?.Invoke();
 
-            Thread.Sleep(interval_ms);
+            Thread.Sleep(intervalMillis);
         }
     }
 

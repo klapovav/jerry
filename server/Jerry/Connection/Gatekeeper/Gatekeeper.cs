@@ -48,11 +48,11 @@ public class Gatekeeper : IDisposable
         var stream = new NetworkStream(socket, true);
 
         //Handshake - stream cipher
-        Agreement output_key, input_key;
+        Agreement outputKey, inputKey;
         try
         {
-            output_key = keyExchange.GeAgreement(stream);
-            input_key = keyExchange.GeAgreement(stream);
+            outputKey = keyExchange.GeAgreement(stream);
+            inputKey = keyExchange.GeAgreement(stream);
         }
         catch (KeyExchangeException)
         {
@@ -61,8 +61,8 @@ public class Gatekeeper : IDisposable
             return;
         }
 
-        var encryptor = new Encryptor(output_key);
-        var decryptor = new Encryptor(input_key);
+        var encryptor = new Encryptor(outputKey);
+        var decryptor = new Encryptor(inputKey);
         var layer = new CommunicationLayer(stream, encryptor, decryptor, true);  //DEBUG  encryption on/off
         var result = Handshake(layer, out var acceptedClient);
         layer.SendConnectionResult(result);
@@ -112,8 +112,8 @@ public class Gatekeeper : IDisposable
         {
             handshakeCount++;
 
-            var new_init_info = validationResult.RepairedInfo;
-            client = new ConnectedClient(layer, new Ticket(handshakeCount), new_init_info);
+            var newInitInfo = validationResult.RepairedInfo;
+            client = new ConnectedClient(layer, new Ticket(handshakeCount), newInitInfo);
             if (!clients.TryAdd(client.Info.Guid, client.ID))
             {
                 return new HandshakeResult(Rejection.Unknown);
