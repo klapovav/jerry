@@ -1,7 +1,7 @@
 pub mod args;
 mod provider;
 use self::provider::ServerConfig;
-use crate::{configuration, CONFIGURATION_FILE};
+use crate::{configuration, DisplayMode, CONFIGURATION_FILE};
 pub use args::Cli;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 pub use provider::ConfigProvider;
@@ -20,7 +20,7 @@ pub fn get_session_info_localhost(args: &args::LocalhostArgs) -> SessionParams {
         server_password: args.password.clone(),
 
         ip: Ipv4Addr::LOCALHOST,
-        visualize: true,
+        display_mode: DisplayMode::CurrentState,
         emulate_events: false,
     }
 }
@@ -56,6 +56,11 @@ pub fn get_session_info(cli: Cli) -> Option<SessionParams> {
         toml::to_string_pretty(&server_specific).expect("Serialization failed")
     );
 
+    let display_mode = match cli.visualizer {
+        true => DisplayMode::CurrentState,
+        false => DisplayMode::Logging,
+    };
+
     Some(SessionParams {
         client_name: client.name,
         client_guid: server_specific.guid.unwrap_or(client.default_guid),
@@ -66,7 +71,7 @@ pub fn get_session_info(cli: Cli) -> Option<SessionParams> {
         port: server_specific.port,
 
         emulate_events: !server_specific.ip.is_loopback() | cli.emulate,
-        visualize: cli.visualizer,
+        display_mode,
     })
 }
 
@@ -185,7 +190,7 @@ pub struct SessionParams {
     pub monitor: ScreenResolution,
     pub ip: Ipv4Addr,
     pub port: u16,
-    pub visualize: bool,
+    pub display_mode: DisplayMode,
     pub emulate_events: bool,
 }
 

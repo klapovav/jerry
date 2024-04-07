@@ -40,18 +40,13 @@ fn main() -> eyre::Result<()> {
         Some(Commands::Localhost(_args)) => configuration::get_session_info_localhost(_args),
     };
 
-    let display_mode = match c_info.visualize {
-        true => DisplayMode::CurrentState,
-        false => DisplayMode::Logging,
-    };
-
-    let _guards = logger_init(display_mode, LOG_LEVEL_FILE, LOG_LEVEL_STD);
+    let _guards = logger_init(c_info.display_mode, LOG_LEVEL_FILE, LOG_LEVEL_STD);
     info!("Program start");
 
-    type Channel = (Sender<Command>, Receiver<Command>);
-    let (tx, rx): Channel = mpsc::channel();
+    // type Channel = (Sender<Command>, Receiver<Command>);
+    let (tx, rx) = mpsc::channel();
     let key_listener = start_exit_key_listener(tx.clone());
-    let ui_thread = start_state_visualization(tx.clone(), c_info.clone(), display_mode, rx);
+    let ui_thread = start_state_visualization(tx.clone(), c_info.clone(), rx);
     let conn_worker = start_connection_loop(tx, c_info);
 
     if let Err(e) = ui_thread.join() {
@@ -115,10 +110,9 @@ fn logger_init(strategy: DisplayMode, file_level: Level, out_level: Level) -> Ve
 fn start_state_visualization(
     tx: Sender<Command>,
     info: SessionParams,
-    mode: DisplayMode,
     rx: Receiver<Command>,
 ) -> JoinHandle<()> {
-    std::thread::spawn(move || match mode {
+    std::thread::spawn(move || match info.display_mode {
         DisplayMode::CurrentState => view_thread_job(info, tx, rx),
         DisplayMode::Logging => log_thread_job(rx),
     })
