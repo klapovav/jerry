@@ -20,7 +20,7 @@ public class Client : IControllableComputer
     private readonly ClientValidInfo clientInfo;
     private readonly ScreenSimple primaryMonitor;
     private readonly Stopwatch lastMoveSend = new();
-    private bool relativeMove = false;
+    private bool relativeMove = true;
     private Vector groupedMove = new(0, 0);
     //FEAT 
     // 1. configuration
