@@ -19,12 +19,6 @@ namespace Jerry.Connection.Security
         {
             byte[] processed = new byte[data.Length];
             cipher.ProcessBytes(data, 0, data.Length, processed, 0);
-
-            //for (int j = 0; j < plainTextData.Length; j++)
-            //{
-            //    cipherTextData[j] = cipher.ReturnByte(plainTextData[j]);
-            //}
-
             return processed;
         }
     }
