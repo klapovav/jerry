@@ -21,7 +21,7 @@ public class Gatekeeper : IDisposable
     private readonly KeyExchange keyExchange;
     private readonly ConcurrentDictionary<Guid, Ticket> clients;
     private int handshakeCount = 0;
-    private Task<IEnumerable<Guid>> updateClientsTask;
+    private Task<IEnumerable<Guid>>? updateClientsTask;
 
     public Gatekeeper(string password, Guid localId, IClientManager virtualDesk)
     {
@@ -37,7 +37,7 @@ public class Gatekeeper : IDisposable
         Log.Debug("Server ID : '{0}'", serverID);
     }
 
-    public void TryAccept(Socket socket)
+    public void HandleIncomingConnection(Socket socket)
     {
         var stopwatch = Stopwatch.StartNew();
         // Ensure that the HealthChecker does not halt (due to potentially
@@ -74,7 +74,7 @@ public class Gatekeeper : IDisposable
             return;
         }
 
-        var client = result.RepairedInfo;
+        var client = result.RepairedInfo!; 
         Log.Verbose("{@ClientInfoValue}", client);
         //Log.Information("Client {Name} display {Width}x{Height} connected, cursor position {X}x{Y}", client.Name,
         //client.Resolution.Width, client.Resolution.Height, client.Cursor.X, client.Cursor.Y);
@@ -87,9 +87,10 @@ public class Gatekeeper : IDisposable
 
     private void InitiateDataUpdate() => updateClientsTask = virtualDesktopManager.GetConnectedClients();
 
+
     private void CompleteDataUpdate()
     {
-        var keysToInclude = updateClientsTask?.Result;
+        var keysToInclude = updateClientsTask?.Result ?? Enumerable.Empty<Guid>();
         var keysToRemove = clients.Keys.Except(keysToInclude).ToList();
         foreach (var key in keysToRemove)
             clients.Remove(key, out _);
@@ -111,8 +112,7 @@ public class Gatekeeper : IDisposable
         if (validationResult.Succeeded)
         {
             handshakeCount++;
-
-            var newInitInfo = validationResult.RepairedInfo;
+            var newInitInfo = validationResult.RepairedInfo!;
             client = new ConnectedClient(layer, new Ticket(handshakeCount), newInitInfo);
             if (!clients.TryAdd(client.Info.Guid, client.ID))
             {
@@ -148,7 +148,7 @@ public class Gatekeeper : IDisposable
             return new HandshakeResult(Rejection.UnexpectedResolution);
         }
         CompleteDataUpdate();
-        var ValidInfo = new ClientValidInfo(received, clients, serverID);
+        var ValidInfo = new ClientValidInfo(received!, clients, serverID);
 
         return new HandshakeResult(ValidInfo, ValidInfo.Warning);
     }

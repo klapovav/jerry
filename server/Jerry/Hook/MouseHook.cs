@@ -5,6 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Jerry.Hook;
+#nullable disable
 
 public enum MouseEvent
 {

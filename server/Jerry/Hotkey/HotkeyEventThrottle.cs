@@ -11,9 +11,6 @@ public class HotkeyEventThrottle
 {
     private DateTime lastUnthrottledEventTime;
     private static readonly int THROTTLETIME = 150;
-
-    public IGlobalHotkeyHandler VirtualDesk { get; }
-
     public HotkeyEventThrottle()
     {
         lastUnthrottledEventTime = DateTime.MinValue;

@@ -46,13 +46,13 @@ public class TrafficController : IDisposable, IInputSubscriber
         if (ke.Pressed)
         {
             //System keyboard shortcut
-            if (lowLevelKeyboardState.SystemGesturePressed(ke.KeyCode, out KeyGesture sysgesture))
+            if (lowLevelKeyboardState.SystemGesturePressed(ke.KeyCode, out var sysgesture))
             {
                 lowLevelKeyboardState.ReleaseModifiers();
                 uiHandler.ReleaseModifiers(sysgesture.Modifiers);
             }
             // Jerry keyboard shortcut
-            if (lowLevelKeyboardState.HotkeyEvent(ke.KeyCode, out JerryKeyGesture gesture))
+            if (lowLevelKeyboardState.HotkeyEventOccurs(ke.KeyCode, out var gesture))
             {
                 if (gesture.Purpose == HotkeyType.SwitchDestination)
                 {

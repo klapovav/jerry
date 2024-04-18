@@ -6,16 +6,16 @@ namespace Jerry.Hotkey;
 
 public class HotkeyRegistration
 {
-    public HotkeyType Purpose { get; init; }
-    private string Name { get; init; } = default!;
-    private EventHandler<HotkeyEventArgs> Handler { get; init; } = default!;
-    private JerryKeyGesture _keyGesture = default;
+    public HotkeyType Purpose { get; }
+    private string Name { get; } 
+    private EventHandler<HotkeyEventArgs> Handler { get; }
+    private JerryKeyGesture _keyGesture = default!;
 
     public HotkeyRegistration(HotkeyType hotkey, JerryKeyGesture keys, EventHandler<HotkeyEventArgs> handler)
     {
         Name = hotkey.ToString();
         Purpose = hotkey;
-        Handler = handler ?? throw new ArgumentNullException();
+        Handler = handler;
         KeyGesture = keys;
         NHotkey.Wpf.HotkeyManager.Current.AddOrReplace(Name, keys, false, Handler);
     }

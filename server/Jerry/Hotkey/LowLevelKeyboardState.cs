@@ -1,6 +1,7 @@
 using Jerry.Hook.SysGlobalState;
 using Serilog;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Windows.Forms;
 using ModifierKeys = System.Windows.Input.ModifierKeys;
@@ -44,7 +45,7 @@ public class LowLevelKeyboardState
 
     private void Release(ModifierKeys modifier) => pressedModifiers &= ~modifier;
 
-    public bool HotkeyEvent(uint keyCode, out JerryKeyGesture pressedGesture)
+    public bool HotkeyEventOccurs(uint keyCode, [MaybeNullWhen(false)] out JerryKeyGesture pressedGesture)
     {
         pressedGesture = null;
         foreach (var hotkey in JerryHotkeys)
@@ -69,7 +70,7 @@ public class LowLevelKeyboardState
         return false;
     }
 
-    public bool SystemGesturePressed(uint keyCode, out KeyGesture gesture)
+    public bool SystemGesturePressed(uint keyCode, [MaybeNullWhen(false)] out KeyGesture gesture)
     {
         gesture = null;
         foreach (var hotkey in SystemILHotkeys)

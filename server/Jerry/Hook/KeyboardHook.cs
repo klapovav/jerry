@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Jerry.Hook;
+#nullable disable
 
 public sealed class KeyboardHook : BaseHook, IHook, IDisposable
 {

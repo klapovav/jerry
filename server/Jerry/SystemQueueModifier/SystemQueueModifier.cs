@@ -1,4 +1,5 @@
 ﻿namespace Jerry.SystemQueueModifier;
+#nullable disable
 
 internal class SystemQueueModifier
 {

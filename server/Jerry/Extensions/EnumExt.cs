@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace Jerry.Extensions;
+#nullable disable
 
 public static class EnumExt
 {

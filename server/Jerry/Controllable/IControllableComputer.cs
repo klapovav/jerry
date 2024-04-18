@@ -1,5 +1,6 @@
 ﻿using Jerry.Coordinates;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
 
 namespace Jerry.Controllable;
@@ -34,9 +35,9 @@ public interface IControllableComputer : IEquatable<IControllableComputer>
 
     void OnKeyEvent(Events.KeyboardHookEvent keyEvent);
 
-    bool OnDeactivate(out Common.Clipboard clipboard);
+    bool OnDeactivate([MaybeNullWhen(false)] out Common.Clipboard clipboard);
 
-    void OnActivate(Common.Clipboard clipboard);
+    void OnActivate(Common.Clipboard? clipboard);
 
     void ReleaseModifiers(ModifierKeys modifiers);
 
@@ -48,7 +49,7 @@ public interface IControllableComputer : IEquatable<IControllableComputer>
     /// </returns>
     bool TrySendHeartbeat();
 
-    bool IEquatable<IControllableComputer>.Equals(IControllableComputer other) => Ticket.Equals(other.Ticket);
+    bool IEquatable<IControllableComputer>.Equals(IControllableComputer? other) => Ticket.Equals(other?.Ticket);
 
     bool EqualsTicket(Ticket other) => Ticket.Equals(other);
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Jerry;
-
+#nullable disable
 public static class PrecompileHelper
 {
     public static void WarmUp(string methodName)

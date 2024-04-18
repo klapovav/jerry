@@ -15,7 +15,7 @@ public sealed class JerryHotkeySettings
 
     public delegate void OnSwitchMonitorEventHandler();
 
-    public event OnSwitchMonitorEventHandler OnSwitchMonitorEvent;
+    public event OnSwitchMonitorEventHandler? OnSwitchMonitorEvent;
 
     private JerryHotkeySettings()
     {
@@ -37,7 +37,7 @@ public sealed class JerryHotkeySettings
                     );
     }
 
-    private void OnSwitchLoggingLevel(object sender, HotkeyEventArgs e)
+    private void OnSwitchLoggingLevel(object? sender, HotkeyEventArgs e)
     {
         switch (DispatcherProvider.LoggingLevelSwitch.MinimumLevel)
         {
@@ -64,5 +64,5 @@ public sealed class JerryHotkeySettings
     public static JerryHotkeySettings Instance
     { get { return lazy.Value; } }
 
-    private void OnSwitchMonitor(object sender, HotkeyEventArgs e) => OnSwitchMonitorEvent?.Invoke();
+    private void OnSwitchMonitor(object? sender, HotkeyEventArgs e) => OnSwitchMonitorEvent?.Invoke();
 }

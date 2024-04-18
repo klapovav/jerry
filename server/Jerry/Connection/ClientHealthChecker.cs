@@ -7,14 +7,14 @@ namespace Jerry.Connection;
 internal class ClientHealthChecker
 {
     private DateTime earliestStopTime;
-    private Task<bool> previousHeartbeatResult;
+    private Task<bool>? previousHeartbeatResult;
     private readonly IClientManager clientManager;
-    private readonly IPeriodicWorker worker;
+    private readonly PeriodicWorker worker;
     public readonly int CHECK_INTERVAL = 1000;
 
     public ClientHealthChecker(IClientManager vdm)
     {
-        worker = new PeriodicWorker();
+        worker = new PeriodicWorker(IntervalElapsedCallback);
         clientManager = vdm;
     }
 
@@ -22,7 +22,7 @@ internal class ClientHealthChecker
     {
         KeepRunning(TimeSpan.FromSeconds(5));
         previousHeartbeatResult = null;
-        worker.Start(IntervalElapsedCallback, CHECK_INTERVAL);
+        worker.Start(CHECK_INTERVAL);
     }
 
     public void KeepRunning(TimeSpan interval)

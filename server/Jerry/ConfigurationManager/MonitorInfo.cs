@@ -20,8 +20,8 @@ public record PhysicalSize
 public record Monitor
 {
     public bool some;
-    public PhysicalSize size;
-    public PhysicalPosition position;
+    public PhysicalSize? size; //CONSIDER required
+    public PhysicalPosition? position;
     public double scale_factor;
 }
 public record MonitorInfo : Monitor

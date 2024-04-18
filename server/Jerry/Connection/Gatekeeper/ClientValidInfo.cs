@@ -3,6 +3,7 @@ using Jerry.Extensions;
 using Slave;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 namespace Jerry.Connection.Gatekeeper;
@@ -53,6 +54,7 @@ public class ClientValidInfo
 
     public ClientValidInfo(ClientInfo original, ConcurrentDictionary<Guid, Ticket> clients, Guid localID)
     {
+        ArgumentNullException.ThrowIfNull(original, nameof(original));
         warning = ErrorLeadingToDataCorrection.None;
         Resolution = new Size(original.Width, original.Height);
         Name = original.Name;
@@ -69,8 +71,8 @@ public class ClientValidInfo
         }
         guid = used;
 
-        var x = original?.Cursor?.X ?? original?.Width / 2 ?? 0;
-        var y = original?.Cursor?.Y ?? original?.Height / 2 ?? 0;
+        var x = original.Cursor?.X ?? original.Width / 2 ;
+        var y = original.Cursor?.Y ?? original.Height / 2 ;
         y = Math.Min(Math.Max(0, y), original.Height - 1);
         x = Math.Min(Math.Max(0, x), original.Width - 1);
 

@@ -5,10 +5,14 @@ using Jerry.LayoutExt.Screen;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Jerry.LayoutExt
 {
+
+
+
     internal class Layout
     {
         private readonly LocalLayout LocalComputer;
@@ -43,7 +47,7 @@ namespace Jerry.LayoutExt
             if (id == LocalComputer.ID)
             { return; }
 
-            if (Screens.Remove(id, out IVirtualDesktopLayout disconnected))
+            if (Screens.Remove(id, out IVirtualDesktopLayout? disconnected))
             {
                 Disconnected.Add(disconnected);
                 return;

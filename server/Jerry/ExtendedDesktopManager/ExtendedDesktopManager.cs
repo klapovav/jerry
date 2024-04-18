@@ -60,7 +60,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
                     t.RunSynchronously();
                     if (t.IsFaulted)
                     {
-                        throw t.Exception;
+                        throw t.Exception!;
                     }
                 }
                 catch (Exception e)
