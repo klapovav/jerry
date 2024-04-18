@@ -18,21 +18,21 @@ public enum System
 
 public class ClientValidInfo
 {
-    private readonly ErrorLeadingToDataCorrection warning;
+    private readonly FixableIssue warning;
 
     private Guid guid;
     public String Name { get; private set; }
     public Size Resolution { get; private set; }
     public System OS { get; private set; }
 
-    public ErrorLeadingToDataCorrection Warning => warning;
+    public FixableIssue Warning => warning;
 
     public Guid Guid
     {
         get { return guid; }
         set
         {
-            warning.Add(ErrorLeadingToDataCorrection.GuidAlreadyUsed);
+            warning.Add(FixableIssue.GuidAlreadyUsed);
             guid = value;
         }
     }
@@ -55,18 +55,18 @@ public class ClientValidInfo
     public ClientValidInfo(ClientInfo original, ConcurrentDictionary<Guid, Ticket> clients, Guid localID)
     {
         ArgumentNullException.ThrowIfNull(original, nameof(original));
-        warning = ErrorLeadingToDataCorrection.None;
+        warning = FixableIssue.None;
         Resolution = new Size(original.Width, original.Height);
         Name = original.Name;
 
         if (!Guid.TryParse(original.Guid.Value, out Guid used))
         {
-            warning = warning.Add(ErrorLeadingToDataCorrection.GuidInvalid);
+            warning = warning.Add(FixableIssue.GuidInvalid);
             used = Guid.NewGuid();
         }
         else if (localID == used || clients.ContainsKey(used))
         {
-            warning = warning.Add(ErrorLeadingToDataCorrection.GuidAlreadyUsed);
+            warning = warning.Add(FixableIssue.GuidAlreadyUsed);
             used = GenerateUniqueGuid(clients, localID);
         }
         guid = used;
@@ -78,7 +78,7 @@ public class ClientValidInfo
 
         if (y != original.Cursor?.Y || x != original.Cursor?.X)
         {
-            warning = warning.Add(ErrorLeadingToDataCorrection.MousePositionOutOfBounds);
+            warning = warning.Add(FixableIssue.MousePositionOutOfBounds);
         }
 
         Cursor = new LocalCoordinate(x, y);

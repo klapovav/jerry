@@ -36,7 +36,7 @@ public class CommunicationLayer : IDisposable
     {
         if (result.Succeeded)
         {
-            if (result.Warnings == ErrorLeadingToDataCorrection.None)
+            if (result.Warnings == FixableIssue.None)
                 TrySendMessage(Factory.ConnectionResult(Master.HandshakeResult.Success, ""));
             else
                 TrySendMessage(Factory.ConnectionResult(Master.HandshakeResult.SuccessWarning, result.Warnings.ToString()));
