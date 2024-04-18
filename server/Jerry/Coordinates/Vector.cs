@@ -9,8 +9,6 @@ public class Vector : IVector
 
     public int DY { get; private set; }
 
-    public int Lenght => Math.Max(Math.Abs(DX), Math.Abs(DY));
-
     public Vector(int x, int y)
     {
         DX = x;
@@ -61,4 +59,5 @@ public class Vector : IVector
 
         return new Vector((int)(a.DX * b), (int)(a.DY * b));
     }
+    public static readonly Vector Empty = new(0, 0);
 }
