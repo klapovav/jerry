@@ -5,11 +5,9 @@ using Jerry.Extensions;
 using Master;
 using Serialization;
 using Serilog;
-using Slave;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Policy;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -22,7 +20,7 @@ public class Client : IControllableComputer
     private readonly ScreenSimple primaryMonitor;
     private readonly Stopwatch lastMoveSend = new();
     private bool relativeMove = true;
-    private Vector groupedMove = new(0, 0);
+    private Vector groupedMove = Vector.Empty;
     //FEAT 
     // 1. configuration
     // 2. debug hotkey
@@ -74,7 +72,7 @@ public class Client : IControllableComputer
         if (lastMoveSend.ElapsedMilliseconds > groupingInterval)
         {
             comLayer.TrySendMessage(comLayer.Factory.MouseMove(x, y));
-            groupedMove = new Vector(0, 0); //REVIEW
+            groupedMove = Vector.Empty;
             lastMoveSend.Restart();
         }
     }

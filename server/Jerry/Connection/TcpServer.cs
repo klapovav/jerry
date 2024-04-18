@@ -82,11 +82,15 @@ public class TcpServer : IDisposable
                     Log.Error("Listen loop cancellation requested");
                     break;
                 }
+
             }
         }
-        catch (SocketException)
+        catch (SocketException e)
         {
-            Log.Information("Accept socket interrupted");
+            if (e.ErrorCode == 10048)
+                Log.Error("Listen loop exception: Address already in use");
+            else
+                Log.Error("Listen loop socket exception: {0}", e.ErrorCode);
         }
         catch (Exception e)
         {
