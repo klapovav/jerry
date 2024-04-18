@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Jerry.Hook;
+#nullable disable
 
 public enum HookType
 {

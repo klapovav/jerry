@@ -8,6 +8,7 @@ using Serilog;
 using Slave;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Policy;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -120,36 +121,37 @@ public class Client : IControllableComputer
         comLayer.TrySendMessage(message);
     }
 
-    public bool OnDeactivate(out Common.Clipboard clipboard)
+    public bool OnDeactivate([MaybeNullWhen(false)] out Common.Clipboard clipboard)
     {
-        var clipReceived = comLayer.TryGetRequest(Request.Clipboard, out SlaveMessage message);
-        clipboard = message?.ClipboardSession;
+        clipboard = null;
+       
 
-        if (!clipReceived)
+        if (!comLayer.TryGetRequest(Request.Clipboard, out var message))
         {
             comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
+            clipboard = null;
             return false;
         }
 
-        if (message?.NoResponse is not null)
+        if (message.NoResponse is not null)
         {
             Log.Debug("Client failed to access clipboard {}", message?.NoResponse?.Reason);
             comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
             return false;
         }
 
-        var msg = message?.ClipboardSession?.Message;
-
-        bool updateJerryClipboard = !string.IsNullOrEmpty(msg);
+        var newClipboardContent = message.ClipboardSession?.Message;
+        clipboard = message.ClipboardSession; 
+        bool updateJerryClipboard = !string.IsNullOrEmpty(newClipboardContent);
         if (updateJerryClipboard)
         {
-            Log.Debug("Global clipboard content changed:{} | content[0..50]: {}", updateJerryClipboard, clipboard.Message.Truncate(50));
+            Log.Debug("Global clipboard content changed:{} | content[0..50]: {}", updateJerryClipboard, newClipboardContent?.Truncate(50));
         }
         comLayer.TrySendMessage(comLayer.Factory.SessionEnd());
-        return updateJerryClipboard;
+        return updateJerryClipboard && clipboard is not null;
     }
 
-    public void OnActivate(Common.Clipboard clipboard)
+    public void OnActivate(Common.Clipboard? clipboard)
     {
         comLayer.TrySendMessage(comLayer.Factory.SessionBegin(relativeMove));
         if (clipboard is not null)

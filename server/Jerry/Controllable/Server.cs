@@ -2,6 +2,7 @@
 using Jerry.Extensions;
 using Serilog;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
 using TextCopy;
 using WK.Libraries.SharpClipboardNS;
@@ -18,8 +19,8 @@ public class Server : IControllableComputer
     public string OS => "Windows";
     public LocalCoordinate CursorPosition { get; private set; }
     public Ticket Ticket { get; }
-    private ClipboardData SessionClipboard { get; set; }
-    private ClipboardData GlobalClipboard { get; set; }
+    private ClipboardData? SessionClipboard { get; set; }
+    private ClipboardData? GlobalClipboard { get; set; }
 
     public Server(Ticket sessionID)
     {
@@ -29,17 +30,18 @@ public class Server : IControllableComputer
         Clipboard.ClipboardChanged += OnClipboardChange;
         Clipboard.ObserveLastEntry = false;
         CursorPosition = new(100, 100);
+
     }
 
-    public bool OnDeactivate(out ClipboardData clipboard)
+    public bool OnDeactivate([MaybeNullWhen(false)]  out ClipboardData clipboard)
     {
         if (SessionClipboard?.Format == Format.Text)
             SessionClipboard.Message = Clipboard.ClipboardText;
-        clipboard = SessionClipboard;
-        return clipboard != null && clipboard != GlobalClipboard;
+        clipboard = SessionClipboard!;
+        return clipboard is not null && clipboard != GlobalClipboard;
     }
 
-    public void OnActivate(ClipboardData clipboard)
+    public void OnActivate(ClipboardData? clipboard)
     {
         GlobalClipboard = clipboard;
         SessionClipboard = null;
@@ -61,7 +63,7 @@ public class Server : IControllableComputer
 
     }
 
-    private void OnClipboardChange(object sender, SharpClipboard.ClipboardChangedEventArgs e)
+    private void OnClipboardChange(object? sender, SharpClipboard.ClipboardChangedEventArgs e)
     {
         SessionClipboard ??= new ClipboardData() { Format = Format.File };
         switch (e.ContentType)

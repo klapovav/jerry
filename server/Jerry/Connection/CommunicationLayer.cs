@@ -6,6 +6,7 @@ using Serialization;
 using Serilog;
 using Slave;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Sockets;
 
@@ -31,7 +32,7 @@ public class CommunicationLayer : IDisposable
         Factory = new MessageFactory();
     }
 
-    public void SendConnectionResult(Connection.Gatekeeper.HandshakeResult result)
+    public void SendConnectionResult(Gatekeeper.HandshakeResult result)
     {
         if (result.Succeeded)
         {
@@ -46,17 +47,18 @@ public class CommunicationLayer : IDisposable
             Rejection.None or
             Rejection.Unknown or
             Rejection.UnexpectedResolution => Factory.ConnectionResult(Master.HandshakeResult.Rejection, result.Warnings.ToString()),
-            Rejection.InitialInfoMissing => Factory.ConnectionResult(Master.HandshakeResult.Rejection, "ClientInfo"),
+            Rejection.InitialInfoMissing => Factory.ConnectionResult(Master.HandshakeResult.Rejection, "Init message not received within timeout"),
             Rejection.KeyExchangeFailed => Factory.ConnectionResult(Master.HandshakeResult.Rejection, "Key exchange failed"),
             Rejection.WrongPassword => Factory.ConnectionResult(Master.HandshakeResult.Rejection, "Password rejected"),
-            _ => throw new NotImplementedException(),
+            _ => throw new ArgumentOutOfRangeException(nameof(result.RejectionType))
         };
         TrySendMessage(echo);
         Disconnect();
         Dispose();
     }
 
-    public bool TryGetRequest(Request requestType, out SlaveMessage response)
+
+    public bool TryGetRequest(Request requestType, [MaybeNullWhen(false)] out SlaveMessage response)
     {
         response = null;
 
@@ -68,7 +70,8 @@ public class CommunicationLayer : IDisposable
             Log.Warning("Server did not receive response for a request {p}", requestType);
             return false;
         }
-        if (response is null) return false;
+        if (response is null)
+            return false;
         return requestType switch
         {
             Request.InitInfo => response.InitInfo is not null,
@@ -98,7 +101,7 @@ public class CommunicationLayer : IDisposable
         }
     }
 
-    public bool TryReadResponse(out SlaveMessage msg, bool extendedReadTimeout)
+    public bool TryReadResponse([MaybeNullWhen(false)] out SlaveMessage msg, bool extendedReadTimeout)
     {
         try
         {
@@ -134,7 +137,7 @@ public class CommunicationLayer : IDisposable
             FailureCount++;
             if (FailureCount == 1)
                 Log.Warning($"Read response failed. {e.Message}");
-            msg = null;
+            msg = null!;
             return false;
         }
         finally

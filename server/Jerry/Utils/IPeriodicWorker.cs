@@ -7,28 +7,22 @@ using System.Threading.Tasks;
 
 namespace Jerry;
 
-internal interface IPeriodicWorker : IDisposable
+internal class PeriodicWorker : IDisposable
 {
-    internal void Start(IntervalElapsedCallback callback, int interval);
-    internal void Stop();
-    bool IsRunning { get; }
-    delegate void IntervalElapsedCallback();
-  
-}
-
-internal class PeriodicWorker : IPeriodicWorker
-{
-    private CancellationTokenSource cancellationToken;
-    private Task longRunningTask;
-    private IPeriodicWorker.IntervalElapsedCallback job;
+    private CancellationTokenSource? cancellationToken;
+    private Task? longRunningTask;
+    private readonly Action job;
     private int intervalMillis;
     public bool IsRunning => longRunningTask?.Status == TaskStatus.Running;
 
-
-    public void Start(IPeriodicWorker.IntervalElapsedCallback callback, int interval)
+    public PeriodicWorker(Action callback)
+    {
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
+        job = callback;
+    }
+    public void Start(int interval)
     {
         intervalMillis = interval;
-        job += callback;
         cancellationToken = new CancellationTokenSource();
         longRunningTask = Task.Factory.StartNew(
             () => OnTick(cancellationToken.Token),
@@ -53,11 +47,8 @@ internal class PeriodicWorker : IPeriodicWorker
     {
         while (!token.IsCancellationRequested)
         {
-            job?.Invoke();
-
+            job.Invoke();
             Thread.Sleep(intervalMillis);
         }
     }
-
-    
 }

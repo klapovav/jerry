@@ -17,8 +17,9 @@ public sealed class DispatcherProvider
         uiDispatcher = UIDispatcher;
         lls = s;
     }
-    private readonly LoggingLevelSwitch lls = null;
-    private static DispatcherProvider instance = null;
+    private readonly LoggingLevelSwitch? lls = null;
+
+    private static DispatcherProvider? instance = null;
     private readonly Dispatcher uiDispatcher;
 
     public static void Init(Dispatcher hookCallbackDispatcher, LoggingLevelSwitch s)

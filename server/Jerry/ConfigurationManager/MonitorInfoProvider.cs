@@ -28,7 +28,7 @@ public static class MonitorInfoProvider
         foreach (var s in Screen.AllScreens)
         {
             var mon = get_monitor(s.DeviceName);
-            if (!mon.some)
+            if (mon is null || !mon.some)
                 throw new NullReferenceException();
             screens.Add(new MonitorInfo(mon, s));
         }

@@ -52,7 +52,7 @@ public interface ISettingsProvider
 public class AppSettings : ISettingsManager, ISettingsProvider
 {
     private static readonly string SETTINGS_PATH = "jerry_server.toml";
-    private Settings cache = default;
+    private Settings? cache = default;
 
     public AppSettings()
     {
@@ -86,7 +86,7 @@ public class AppSettings : ISettingsManager, ISettingsProvider
                 Ctrl = true,
                 Alt = true,
                 Key = "H",
-            }
+            },
         };
     }
 
@@ -103,13 +103,13 @@ public class AppSettings : ISettingsManager, ISettingsProvider
             {
                 foreach (var i in result)
                     Log.Warning("Configuration file is not valid: {@ValidationResult}", i);
-                Log.Warning("Default configuration: {@Settings}", Toml.FromModel(cache));
+                Log.Warning("Default configuration: {@Settings}", Toml.FromModel(CreateDefault()));
             }
             else
             {
                 cache = settings;
             }
-            return cache;
+            return cache ?? CreateDefault();
         }
         catch (FileNotFoundException)
         {
@@ -149,17 +149,19 @@ public class AppSettings : ISettingsManager, ISettingsProvider
 
     public Settings GetSettings()
     {
-        if (cache == default(Settings))
-            Load();
-        return cache;
+        return cache ?? Load();
     }
 }
 
 public class Settings : ITomlMetadataProvider
 {
+    public Settings()
+    {
+            
+    }
     [MinLengthAttribute(4, ErrorMessage = "The {0} must be at least {1} characters long.")]
     [Required]
-    public string Password { get; set; }
+    public string Password { get; set; } = String.Empty;
 
     //1024..49151 registered
     //49152..65535 dynamic
@@ -170,36 +172,28 @@ public class Settings : ITomlMetadataProvider
     //[Required]
     public bool EnableMouseGesture { get; set; }
 
-    [Required]
-    public Shortcut ShortcutSwitchScreens { get; set; }
+    public Shortcut? ShortcutSwitchScreens { get; set; }
 
-    [Required]
-    public Shortcut ShortcutSwitchHome { get; set; }
+    public Shortcut? ShortcutSwitchHome { get; set; }
 
-    public TomlPropertiesMetadata PropertiesMetadata { get; set; }
+    public TomlPropertiesMetadata? PropertiesMetadata { get; set; }
 
     public JerryKeyGesture SwitchMonitor => ParseFromOrDefault(ShortcutSwitchScreens, HotkeyType.SwitchDestination);
     public JerryKeyGesture SwitchHome => ParseFromOrDefault(ShortcutSwitchHome, HotkeyType.SwitchToServer);
-    public JerryKeyGesture SwitchMouseMove => GetDefault(HotkeyType.SwitchMouseMove);
+    public JerryKeyGesture SwitchMouseMove => JerryKeyGesture.Default(HotkeyType.SwitchMouseMove);
 
-    private static JerryKeyGesture ParseFromOrDefault(Shortcut sc, HotkeyType type) => ParseFrom(sc, type) ?? GetDefault(type);
+    private static JerryKeyGesture ParseFromOrDefault(Shortcut? sc, HotkeyType type) => ParseFrom(sc, type) ?? JerryKeyGesture.Default(type);
 
-    private static JerryKeyGesture GetDefault(HotkeyType type) => type switch
+    private static JerryKeyGesture? ParseFrom(Shortcut? sc, HotkeyType type)
     {
-        HotkeyType.SwitchDestination => new JerryKeyGesture(type, Key.N, ModifierKeys.Control | ModifierKeys.Alt),
-        HotkeyType.SwitchToServer => new JerryKeyGesture(type, Key.H, ModifierKeys.Control | ModifierKeys.Alt),
-        HotkeyType.SwitchMouseMove => new JerryKeyGesture(type, Key.F1, ModifierKeys.Control | ModifierKeys.Alt),
-        _ => throw new NotImplementedException(),
-    };
-
-    private static JerryKeyGesture ParseFrom(Shortcut sc, HotkeyType type)
-    {
-        if (!System.Enum.TryParse(typeof(Key), sc.Key, out object key2))
+        if (sc is null)
+            return null;
+        if (!System.Enum.TryParse(typeof(Key), sc.Key, out object? key))
         {
             Log.Error("Configuration file is not valid: value '{a}' is not included in System.Windows.Input.Key", sc.Key);
             return null;
         }
-        return new JerryKeyGesture(type, (Key)key2, GetModifiers(sc));
+        return new JerryKeyGesture(type, (Key)key, GetModifiers(sc));
     }
 
     private static ModifierKeys GetModifiers(Shortcut shortcut)
@@ -223,7 +217,7 @@ public class Shortcut : ITomlMetadataProvider
     [Required]
     [RegularExpression(@"[a-zA-Z0-9]",
      ErrorMessage = "Special characters are not allowed.")]
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
-    public TomlPropertiesMetadata PropertiesMetadata { get; set; }
+    public TomlPropertiesMetadata? PropertiesMetadata { get; set; }
 }

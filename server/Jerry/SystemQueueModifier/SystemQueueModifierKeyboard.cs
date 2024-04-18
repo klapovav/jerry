@@ -2,6 +2,7 @@
 using Jerry.Hook;
 
 namespace Jerry.SystemQueueModifier;
+#nullable disable
 
 internal sealed class SystemQueueModifierKeyboard : SystemQueueModifierBase<KeyboardInput>
 {

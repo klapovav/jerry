@@ -6,6 +6,8 @@
     <OutputType>Library</OutputType>
     <StartupObject />
     <Configurations>Debug;Release;DebugLoopback</Configurations>
+	  <Nullable>enable</Nullable>
+	  <WarningsAsErrors>Nullable</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

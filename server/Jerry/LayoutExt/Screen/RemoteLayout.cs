@@ -3,6 +3,7 @@ using Jerry.Coordinates;
 using System.Drawing;
 
 namespace Jerry.LayoutExt.Screen;
+#nullable disable
 
 internal class RemoteLayout : IVirtualDesktopLayout
 {
@@ -18,7 +19,7 @@ internal class RemoteLayout : IVirtualDesktopLayout
 
     public Ticket ID { get; }
 
-    public LayoutCoordinate RightTopCorner => new LayoutCoordinate(Primary.Position.Right - 1, Primary.Position.Top);
+    public LayoutCoordinate RightTopCorner => new(Primary.Position.Right - 1, Primary.Position.Top);
 
     public int Right => Primary.Position.Right - 1;
 

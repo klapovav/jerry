@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 
 namespace Jerry.Hotkey;
 
@@ -10,6 +11,13 @@ public class JerryKeyGesture : KeyGesture
     {
         Purpose = purpose;
     }
+    public static JerryKeyGesture Default(HotkeyType type) => type switch
+    {
+        HotkeyType.SwitchDestination => new JerryKeyGesture(type, Key.N, ModifierKeys.Control | ModifierKeys.Windows),
+        HotkeyType.SwitchToServer => new JerryKeyGesture(type, Key.H, ModifierKeys.Control | ModifierKeys.Windows),
+        HotkeyType.SwitchMouseMove => new JerryKeyGesture(type, Key.F1, ModifierKeys.Control | ModifierKeys.Alt),
+        _ => throw new NotImplementedException(),
+    };
 }
 
 public class KeyGesture : System.Windows.Input.KeyGesture

@@ -24,7 +24,7 @@ public readonly struct Ticket
         return !t1.Equals(t2);
     }
 
-    public override readonly bool Equals(object obj)
+    public override readonly bool Equals(object? obj)
     {
         if (obj is Ticket other)
             return ID.Equals(other.ID);

@@ -4,7 +4,7 @@ using Jerry.Hook.WinApi;
 using Serilog;
 
 namespace Jerry.SystemQueueModifier;
-
+#nullable disable
 internal sealed class SystemQueueModifierMouse : SystemQueueModifierBase<MouseInput>
 {
     private KeyboardSyncSupervisor buttonSyncSupervisor;

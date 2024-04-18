@@ -14,7 +14,7 @@ namespace Jerry.ExtendedDesktopManager;
 
 internal class BaseDesktopManager : IExtendedDesktopManager
 {
-    private ClipboardData GlobalClipboard { get; set; }
+    private ClipboardData? GlobalClipboard { get; set; }
     protected Server LocalComputer { get; }
     private readonly List<IControllableComputer> remoteClients = new();
     private IControllableComputer _active;
@@ -23,20 +23,20 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         get { return _active; }
         private set
         {
-            if (_active?.OnDeactivate(out ClipboardData clipboard) == true)
+            if (_active.OnDeactivate(out var clipboard))
             {
                 Log.Debug("Global clipboard length: {0}", clipboard.Message.Length);
                 GlobalClipboard = clipboard;
             }
             var newStrategy = value.Equals(LocalComputer) ? Strategy.Local : Strategy.Remote;
-            OnActiveChanged?.Invoke(newStrategy);
+            OnActiveChanged.Invoke(newStrategy);
             _active = value;
             _active.OnActivate(GlobalClipboard);
         }
     }
 
-    public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
-    public IMouseKeyboardEventHandler Subscriber { get; set; } = null;
+    public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)?? String.Empty;
+    public IMouseKeyboardEventHandler? Subscriber { get; set; } = null;
     public virtual Mode Mode => Mode.Basic;
     public Action<Strategy> OnActiveChanged { get; }
     public BaseDesktopManager(Action<Strategy> onActiveChanged)
@@ -163,7 +163,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     protected void SwitchTo(Ticket monitorID)
     {
         var newMon = remoteClients
-            .Append(LocalComputer) // REVIEW
+            .Append(LocalComputer)
             .Where(s => s.EqualsTicket(monitorID))
             .FirstOrDefault();
         if (newMon == default(IControllableComputer))

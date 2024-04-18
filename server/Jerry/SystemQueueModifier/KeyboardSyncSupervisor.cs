@@ -48,6 +48,7 @@ internal class KeyboardSyncSupervisor
         creationTime = DateTime.Now;
         state = Reliability.Unreliable;
         previouslyPressed = new List<byte>();
+        lastLoggedValue = String.Empty;
     }
 
     public static bool KeyIsLogicallyDown(uint virtualKeyCode)

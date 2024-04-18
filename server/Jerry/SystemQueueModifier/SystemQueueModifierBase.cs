@@ -83,14 +83,5 @@ namespace Jerry.SystemQueueModifier
             _blockedInput.Equals(_none) &&
             _subscribedInput.Equals(_none);
 
-        //REVIEW
-        protected void AssertEqualResponse(FilterResult expected, bool stopPropagation, string eventDescr)
-        {
-            var currentResponse = stopPropagation
-                ? FilterResult.Discard
-                : FilterResult.Keep;
-            if (expected != currentResponse)
-                Serilog.Log.Debug("{event}: TrafficController osResponse {ex} is different from SystemQueueModifiers {cur}", eventDescr, expected, currentResponse);
-        }
     }
 }

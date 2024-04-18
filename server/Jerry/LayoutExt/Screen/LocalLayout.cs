@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 
 namespace Jerry.LayoutExt.Screen;
+#nullable disable
 
 internal class LocalLayout : IVirtualDesktopLayout
 {
