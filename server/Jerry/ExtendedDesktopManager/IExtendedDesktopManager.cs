@@ -27,20 +27,20 @@ public interface IClientManager
 
     void DisconnectClient(Ticket id);
 
-    Task<bool> TrySendHeartbeat(Ticket id);
+    Task<bool> TrySendHeartbeatAsync(Ticket id);
 
     /// <summary>
     /// Send a heartbeat to all clients and update the list
     /// of connected clients based on successful heartbeat responses.
     /// </summary>
     /// <returns>The list of responsive clients</returns>
-    Task<IEnumerable<Guid>> GetConnectedClients();
+    Task<IEnumerable<Guid>> GetConnectedClientsAsync();
 
     /// <summary>
     /// Sends heartbeat to all connected clients to maintain the connection.
     /// </summary>
-    /// <returns>Returns true if there are still connected clients</returns>
-    Task<bool> HearbeatAnyClientIsSuccessful();
+    /// <returns>Returns true if at least one client is connected</returns>
+    Task<bool> HearbeatAnyClientIsSuccessfulAsync();
 }
 public interface IInputSubscriber
 {

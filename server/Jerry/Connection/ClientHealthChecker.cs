@@ -47,7 +47,7 @@ internal class ClientHealthChecker
             }
         }
 
-        previousHeartbeatResult = clientManager.HearbeatAnyClientIsSuccessful();
+        previousHeartbeatResult = clientManager.HearbeatAnyClientIsSuccessfulAsync();
     }
 
     public void Dispose()

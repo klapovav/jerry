@@ -108,14 +108,14 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception) { }
     }
 
-    public Task<IEnumerable<Guid>> GetConnectedClients()
+    public Task<IEnumerable<Guid>> GetConnectedClientsAsync()
     {
         try
         {
             var tsc = new TaskCompletionSource<IEnumerable<Guid>>();
             var t = new Task(async () =>
             {
-                tsc.SetResult(await Implementation.GetConnectedClients());
+                tsc.SetResult(await Implementation.GetConnectedClientsAsync());
             });
             _jobs.TryAdd(t, Timeout.Infinite);
             return tsc.Task;
@@ -123,14 +123,14 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception) { return Task.FromResult(Enumerable.Empty<Guid>()); }
     }
 
-    public Task<bool> HearbeatAnyClientIsSuccessful()
+    public Task<bool> HearbeatAnyClientIsSuccessfulAsync()
     {
         try
         {
             var tsc = new TaskCompletionSource<bool>();
             var t = new Task(async () =>
             {
-                tsc.SetResult(await Implementation.HearbeatAnyClientIsSuccessful());
+                tsc.SetResult(await Implementation.HearbeatAnyClientIsSuccessfulAsync());
             });
             _jobs.TryAdd(t, Timeout.Infinite);
             return tsc.Task;
@@ -141,14 +141,14 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         }
     }
 
-    public Task<bool> TrySendHeartbeat(Ticket id)
+    public Task<bool> TrySendHeartbeatAsync(Ticket id)
     {
         try
         {
             var tsc = new TaskCompletionSource<bool>();
             var t = new Task(async () =>
             {
-                tsc.SetResult(await Implementation.TrySendHeartbeat(id));
+                tsc.SetResult(await Implementation.TrySendHeartbeatAsync(id));
             });
             _jobs.TryAdd(t, 1000);
             return tsc.Task;

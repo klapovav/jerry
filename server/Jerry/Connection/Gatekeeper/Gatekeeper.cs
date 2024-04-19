@@ -85,7 +85,7 @@ public class Gatekeeper : IDisposable
         Log.Debug("Handshake completed successfully Exec time: {Elapsed:000} ms;  Warnings: {war}", stopwatch.Elapsed.Milliseconds, result.Warnings);
     }
 
-    private void InitiateDataUpdate() => updateClientsTask = virtualDesktopManager.GetConnectedClients();
+    private void InitiateDataUpdate() => updateClientsTask = virtualDesktopManager.GetConnectedClientsAsync();
 
 
     private void CompleteDataUpdate()
