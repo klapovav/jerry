@@ -1,5 +1,7 @@
+using Jerry;
 using Jerry.ConfigurationManager;
 using Jerry.Connection;
+using Jerry.Controller;
 using Jerry.ExtendedDesktopManager;
 using Jerry.Hook;
 using Serilog;
@@ -20,12 +22,14 @@ public class TrayIconVM : INotifyPropertyChanged
 {
     public string ServerInfoAddress { get; init; }
     public string ServerInfoPassword { get; init; }
+
     private Settings settings;
     private TcpServer rawTcp;
     private TrafficController trafficController;
     private ExtendedDesktopManager desktopManager;
 
     private Mode jerryMode;
+
 
     public Mode JerryMode
     {
@@ -71,6 +75,9 @@ public class TrayIconVM : INotifyPropertyChanged
         ServerInfoPassword = String.Format($"Password: \"{settings.Password}\"");
     }
 
+    public string ShowHideLogHeader => LogController.Instance.ConsoleWindow.IsVisible
+        ? "Hide log window"
+        : "Show log window";
     public string ChangeModeTitle => JerryMode == Mode.Basic
                 ? "Enable mouse gesture"
                 : "Disable mouse gesture";
@@ -87,6 +94,16 @@ public class TrayIconVM : INotifyPropertyChanged
         ? "Reconnect clients"
         : "Disconnect clients";
 
+
+    public ICommand ShowHideLogCommand => new DelegateCommand
+    {
+        CanExecuteFunc = () => true,
+        CommandAction = () =>
+        {
+            LogController.Instance.ConsoleWindow.ChangeVisibility();
+            OnPropertyChanged(nameof(ShowHideLogHeader));
+        }
+    };
     public ICommand DisconnectClientsCommand => new DelegateCommand
     {
         CanExecuteFunc = () => true,
