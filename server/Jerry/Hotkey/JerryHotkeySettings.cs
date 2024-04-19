@@ -1,3 +1,4 @@
+using Jerry.Controller;
 using NHotkey;
 using Serilog;
 using System;
@@ -39,16 +40,17 @@ public sealed class JerryHotkeySettings
 
     private void OnSwitchLoggingLevel(object? sender, HotkeyEventArgs e)
     {
-        switch (DispatcherProvider.LoggingLevelSwitch.MinimumLevel)
+        var lvlSwitch = LogController.Instance.LoggingLevelSwitch;
+        switch (lvlSwitch.MinimumLevel)
         {
             case Serilog.Events.LogEventLevel.Verbose:
-                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+                lvlSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
                 break;
             case Serilog.Events.LogEventLevel.Debug:
-                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+                lvlSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
                 break;
             case Serilog.Events.LogEventLevel.Information:
-                DispatcherProvider.LoggingLevelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
+                lvlSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
                 break;
             case Serilog.Events.LogEventLevel.Warning:
                 break;

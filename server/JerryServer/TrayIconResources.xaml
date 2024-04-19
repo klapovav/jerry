@@ -10,7 +10,7 @@
     <ContextMenu x:Shared="false" x:Key="SysTrayMenu">
         <MenuItem Header="{Binding ServerInfoAddress}" ToolTip="{Binding ServerInfoPassword}" />
         <Separator />
-
+        <MenuItem Header="{Binding ShowHideLogHeader}" Command="{Binding ShowHideLogCommand}" />
         <MenuItem Header="{Binding ChangeModeTitle}" Command="{Binding SwitchModeCommand}" IsEnabled="False" />
         <MenuItem Header="{Binding DisconnectClientsTitle}" Command="{Binding DisconnectClientsCommand}" />
         <MenuItem Header="{Binding StartStopListeningHeader}" Command="{Binding StartStopListeningCommand}" ToolTip="{Binding StartStopListeningTitle}" />
