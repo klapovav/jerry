@@ -200,18 +200,18 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     public void PoisonYourself() { }
 
-    public Task<bool> TrySendHeartbeat(Ticket id)
+    public Task<bool> TrySendHeartbeatAsync(Ticket id)
     {
         return Task.FromResult(remoteClients.FirstOrDefault(rm => rm.Ticket == id)?.TrySendHeartbeat() ?? false);
     }
 
-    public Task<IEnumerable<Guid>> GetConnectedClients()
+    public Task<IEnumerable<Guid>> GetConnectedClientsAsync()
     {
         UpdateRemoteClients();
         return Task.FromResult(remoteClients.Select(cl => cl.ID));
     }
 
-    public Task<bool> HearbeatAnyClientIsSuccessful()
+    public Task<bool> HearbeatAnyClientIsSuccessfulAsync()
     {
         this.UpdateRemoteClients();
         var atLeastOneIsHealthy = remoteClients.Count > 0;
