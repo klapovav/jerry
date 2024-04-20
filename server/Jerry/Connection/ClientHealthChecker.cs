@@ -11,6 +11,7 @@ internal class ClientHealthChecker
     private readonly IClientManager clientManager;
     private readonly PeriodicWorker worker;
     public readonly int CHECK_INTERVAL = 1000;
+    private bool isRunning = false;
 
     public ClientHealthChecker(IClientManager vdm)
     {
@@ -20,7 +21,12 @@ internal class ClientHealthChecker
 
     public void Start()
     {
+        if (isRunning)
+        {
+            return;
+        }
         KeepRunning(TimeSpan.FromSeconds(5));
+        isRunning = true;
         previousHeartbeatResult = null;
         worker.Start(CHECK_INTERVAL);
     }
@@ -42,6 +48,7 @@ internal class ClientHealthChecker
             }
             if (!res.Result && DateTime.Now > earliestStopTime)
             {
+                isRunning = false;
                 worker.Stop();
                 return;
             }

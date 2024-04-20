@@ -1,4 +1,5 @@
 ﻿using Jerry.ConfigurationManager;
+using Jerry.Controllable;
 using Serilog;
 using System;
 using System.Net;
@@ -15,6 +16,8 @@ public class TcpServer : IDisposable
     public event NewClientEventHandler? OnIncomingConnection;
     public delegate void NewClientEventHandler(Gatekeeper.HandshakeResult result);
     private readonly TcpListener tcpListener;
+    private readonly ClientHealthChecker clientHealthChecker;
+
     private IPEndPoint IPEndPoint { get; }
 
     private readonly Gatekeeper.Gatekeeper Gatekeeper;
@@ -23,9 +26,16 @@ public class TcpServer : IDisposable
 
     public TcpServer(IClientManager virtualDesk, Settings settings)
     {
+        var serverID = Guid.NewGuid();
         IPEndPoint = new IPEndPoint(IPAddress.Any, settings.Port);
         tcpListener = new TcpListener(IPEndPoint.Address, IPEndPoint.Port);
-        Gatekeeper = new Gatekeeper.Gatekeeper(settings.Password, Guid.NewGuid(), virtualDesk);
+        Gatekeeper = new Gatekeeper.Gatekeeper(settings.Password, serverID, virtualDesk);
+        clientHealthChecker = new(virtualDesk);
+
+
+        Log.Debug("Password : {0}", settings.Password);
+        Log.Debug("Heartbeat interval : {0}ms", clientHealthChecker.CHECK_INTERVAL);
+        Log.Debug("Server ID : '{0}'", serverID);
     }
 
     public void StartListening()
@@ -56,7 +66,15 @@ public class TcpServer : IDisposable
         try
         {
             Log.Information("New incoming connection.{EndPoint}", socket.RemoteEndPoint);
+            // Ensure that the HealthChecker does not halt (due to potentially
+            // outdated data) shortly after a new client is connected, as the number
+            // of clients may change in the near future.
+            clientHealthChecker.KeepRunning(TimeSpan.FromSeconds(3));
             var result = Gatekeeper.HandleIncomingConnection(socket);
+            if (result.Succeeded) 
+            {
+                clientHealthChecker.Start();
+            }
             OnIncomingConnection?.Invoke(result);
         }
         catch (Exception ex)
@@ -108,6 +126,7 @@ public class TcpServer : IDisposable
 
     public void Dispose()
     {
+        clientHealthChecker.Dispose();
         StopListening();
         Gatekeeper.DisconnectAll();
         Gatekeeper.Dispose();
