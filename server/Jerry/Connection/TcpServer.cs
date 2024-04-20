@@ -12,6 +12,8 @@ public delegate void OnSocketAccept(Socket s);
 
 public class TcpServer : IDisposable
 {
+    public event NewClientEventHandler? OnIncomingConnection;
+    public delegate void NewClientEventHandler(Gatekeeper.HandshakeResult result);
     private readonly TcpListener tcpListener;
     private IPEndPoint IPEndPoint { get; }
 
@@ -54,7 +56,8 @@ public class TcpServer : IDisposable
         try
         {
             Log.Information("New incoming connection.{EndPoint}", socket.RemoteEndPoint);
-            Gatekeeper.HandleIncomingConnection(socket);
+            var result = Gatekeeper.HandleIncomingConnection(socket);
+            OnIncomingConnection?.Invoke(result);
         }
         catch (Exception ex)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Jerry.Connection.Gatekeeper;
 
@@ -48,10 +49,15 @@ public struct HandshakeResult
 public enum Rejection
 {
     None,
+    [Display(Name = "Unknown")]
     Unknown,
+    [Display(Name = "Key exchange failed")]
     KeyExchangeFailed,
+    [Display(Name = "Client error: Initial message missing")]
     InitialInfoMissing,
+    [Display(Name = "Client error: Unexpected resolution")]
     UnexpectedResolution,
+    [Display(Name = "Wrong password")]
     WrongPassword,
 }
 

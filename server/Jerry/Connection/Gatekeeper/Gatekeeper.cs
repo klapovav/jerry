@@ -37,7 +37,7 @@ public class Gatekeeper : IDisposable
         Log.Debug("Server ID : '{0}'", serverID);
     }
 
-    public void HandleIncomingConnection(Socket socket)
+    public HandshakeResult HandleIncomingConnection(Socket socket)
     {
         var stopwatch = Stopwatch.StartNew();
         // Ensure that the HealthChecker does not halt (due to potentially
@@ -58,7 +58,7 @@ public class Gatekeeper : IDisposable
         {
             Log.Error("Key exchange failed; Client and server couldn't agree on algorithm for key exchange and encryption");
             stream.Dispose();
-            return;
+            return new HandshakeResult(Rejection.KeyExchangeFailed);
         }
 
         var encryptor = new Encryptor(outputKey);
@@ -71,7 +71,7 @@ public class Gatekeeper : IDisposable
         if (!result.Succeeded)
         {
             Log.Warning("Handshake failed {Result}", result.RejectionType.ToString());
-            return;
+            return result;
         }
 
         var client = result.RepairedInfo!; 
@@ -83,6 +83,8 @@ public class Gatekeeper : IDisposable
         virtualDesktopManager.RegisterClient(acceptedClient);
 
         Log.Debug("Handshake completed successfully Exec time: {Elapsed:000} ms;  Warnings: {war}", stopwatch.Elapsed.Milliseconds, result.Warnings);
+        return result;
+
     }
 
     private void InitiateDataUpdate() => updateClientsTask = virtualDesktopManager.GetConnectedClientsAsync();

@@ -3,7 +3,6 @@ using Jerry.Extensions;
 using Slave;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 namespace Jerry.Connection.Gatekeeper;

@@ -21,7 +21,7 @@ public partial class App : Application
         base.OnStartup(e);
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         SetCurrentThreadExtra(Jerry.Constants.JerryServerID);
-        trayIcon = (TaskbarIcon)FindResource("JTrayIcon");
+        trayIcon = (TaskbarIcon)FindResource("NotifyIcon");
     }
 
     private void SetCurrentThreadExtra(UInt16 id)

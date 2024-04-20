@@ -1,12 +1,16 @@
+using Hardcodet.Wpf.TaskbarNotification;
 using Jerry;
 using Jerry.ConfigurationManager;
 using Jerry.Connection;
+using Jerry.Connection.Gatekeeper;
 using Jerry.Controller;
 using Jerry.ExtendedDesktopManager;
+using Jerry.Extensions;
 using Jerry.Hook;
 using Serilog;
 using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -24,6 +28,7 @@ public class TrayIconVM : INotifyPropertyChanged
     public string ServerInfoPassword { get; init; }
 
     private Settings settings;
+    private ushort clientCount = 0;
     private TcpServer rawTcp;
     private TrafficController trafficController;
     private ExtendedDesktopManager desktopManager;
@@ -45,7 +50,34 @@ public class TrayIconVM : INotifyPropertyChanged
             desktopManager = new ExtendedDesktopManager(value, OnActiveChanged);
             trafficController = new TrafficController(desktopManager);
             rawTcp = new TcpServer(desktopManager, settings);
+            rawTcp.OnIncomingConnection += RawTcp_OnIncomingConnection;            
             rawTcp.StartListening();
+        }
+    }
+
+    private void RawTcp_OnIncomingConnection(HandshakeResult result)
+    {
+        var trayIcon = (TaskbarIcon)Application.Current.FindResource("NotifyIcon");
+        if (result.Succeeded)
+        {
+            clientCount++;
+            trayIcon.HideBalloonTip();
+            trayIcon.ShowBalloonTip(
+                String.Format($"New client connected  |  Total count: {clientCount}"),
+                String.Format(
+                $"Name: \t {result.RepairedInfo.Name} ({result.RepairedInfo.OS})\n" +
+                $"Monitor:\t {result.RepairedInfo.Resolution.Width}x{result.RepairedInfo.Resolution.Height}\n" +
+                $"Cursor: \t {result.RepairedInfo.Cursor.X}x{result.RepairedInfo.Cursor.Y}\n"),
+                BalloonIcon.Info);
+        }
+        else
+        {
+            trayIcon.HideBalloonTip();
+            trayIcon.ShowBalloonTip(
+                String.Format($"{result.RejectionType.GetAttribute<DisplayAttribute>().Name}"),
+                String.Format($"Connection refused"),
+                BalloonIcon.Error);
+
         }
     }
 

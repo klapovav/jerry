@@ -19,7 +19,7 @@
     </ContextMenu>
 
     <!-- the application's NotifyIcon - started from App.xaml.cs. Declares its own view model. -->
-    <tb:TaskbarIcon x:Key="JTrayIcon"
+    <tb:TaskbarIcon x:Key="NotifyIcon"
                     IconSource="/img/jerry_tray.ico"
                     ToolTipText="Jerry Server"
                     MenuActivation="LeftOrRightClick"
