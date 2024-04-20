@@ -17,7 +17,6 @@ public class Gatekeeper : IDisposable
     private readonly string correctPassword;
     private readonly Guid serverID;
     private readonly IClientManager virtualDesktopManager;
-    private readonly ClientHealthChecker clientHealthChecker;
     private readonly KeyExchange keyExchange;
     private readonly ConcurrentDictionary<Guid, Ticket> clients;
     private int handshakeCount = 0;
@@ -29,21 +28,13 @@ public class Gatekeeper : IDisposable
         serverID = localId;
         virtualDesktopManager = virtualDesk;
         keyExchange = new();
-        clientHealthChecker = new(virtualDesk);
         clients = new ConcurrentDictionary<Guid, Ticket>();
-
-        Log.Debug("Password : {0}", correctPassword);
-        Log.Debug("Heartbeat interval : {0}ms", clientHealthChecker.CHECK_INTERVAL);
-        Log.Debug("Server ID : '{0}'", serverID);
     }
 
     public HandshakeResult HandleIncomingConnection(Socket socket)
     {
         var stopwatch = Stopwatch.StartNew();
-        // Ensure that the HealthChecker does not halt (due to potentially
-        // outdated data) shortly after a new client is connected, as the number
-        // of clients may change in the near future.
-        clientHealthChecker.KeepRunning(TimeSpan.FromSeconds(3));
+        
         InitiateDataUpdate();
         var stream = new NetworkStream(socket, true);
 
@@ -78,7 +69,6 @@ public class Gatekeeper : IDisposable
         Log.Verbose("{@ClientInfoValue}", client);
         //Log.Information("Client {Name} display {Width}x{Height} connected, cursor position {X}x{Y}", client.Name,
         //client.Resolution.Width, client.Resolution.Height, client.Cursor.X, client.Cursor.Y);
-        _ = clients.TryGetValue(client.Guid, out _);
 
         virtualDesktopManager.RegisterClient(acceptedClient);
 
@@ -120,13 +110,7 @@ public class Gatekeeper : IDisposable
             {
                 return new HandshakeResult(Rejection.Unknown);
             }
-            else
-            {
-                if (clients.Count == 1)
-                {
-                    clientHealthChecker.Start();
-                }
-            }
+            
         }
 
         return validationResult;
@@ -167,7 +151,6 @@ public class Gatekeeper : IDisposable
 
     public void Dispose()
     {
-        clientHealthChecker.Dispose();
         DisconnectAll();
         clients.Clear();
     }
