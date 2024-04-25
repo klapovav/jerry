@@ -108,6 +108,16 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception) { }
     }
 
+    public void DisconnectClient(Guid id)
+    {
+        try
+        {
+            var t = new Task(() => Implementation.DisconnectClient(id));
+            _jobs.TryAdd(t, Timeout.Infinite);
+        }
+        catch (Exception) { }
+    }
+
     public Task<IEnumerable<Guid>> GetConnectedClientsAsync()
     {
         try

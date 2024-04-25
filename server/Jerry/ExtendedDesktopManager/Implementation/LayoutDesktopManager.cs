@@ -1,5 +1,6 @@
 ﻿using Jerry.Hook;
 using Jerry.LayoutExt;
+using Org.BouncyCastle.Crmf;
 using System;
 
 namespace Jerry.ExtendedDesktopManager;
@@ -31,16 +32,22 @@ internal class LayoutDesktopManager : BaseDesktopManager
         ExtDesktopLayout = new(base.LocalComputer.Ticket);
     }
 
-    public override void RegisterClient(ConnectedClient proxy)
+    public override void RegisterClient(ConnectedClient client)
     {
-        ExtDesktopLayout.AddRemote(proxy);
-        base.RegisterClient(proxy);
+        ExtDesktopLayout.AddRemote(client);
+        base.RegisterClient(client);
     }
 
     public override void DisconnectClient(Ticket disc_id)
     {
         ExtDesktopLayout.Remove(disc_id);
         base.DisconnectClient(disc_id);
+    }
+
+    public override void DisconnectClient(Guid disc_id)
+    {
+        // TODO mouse-transition branch
+        throw new NotImplementedException();
     }
 
     public override void OnMouseEvent(Events.MouseDeltaMove mouseMove)

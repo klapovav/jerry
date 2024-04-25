@@ -47,11 +47,3 @@ public enum KeyState
     KeyDown = 0,
     KeyUp = 1
 }
-
-public enum CreatedBy
-{
-    Hardware = 0,
-    JerryClient = 1,
-    JerrySlave = 2,
-    AnotherApp = 3
-}

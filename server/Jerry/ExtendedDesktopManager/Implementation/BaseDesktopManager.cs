@@ -49,7 +49,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     public virtual void RegisterClient(ConnectedClient client)
     {
         if (remoteClients.Where(s => s.Ticket == client.ID).Any()
-            || remoteClients.Where(s => s.ID == client.Info.Guid).Any())
+         || remoteClients.Where(s => s.ID == client.Info.Guid).Any())
         {
             Log.Error("The new client was rejected due to a non-unique ticket({id}) or guid", client.ID.ID);
             return;
@@ -83,6 +83,17 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         {
             Log.Error(ex, "VDM.DisconnectClient() Exception");
         }
+    }
+
+    public virtual void DisconnectClient(Guid guid)
+    {
+        var client = remoteClients.Find(cc => cc.ID == guid);
+        if (client == default)
+        {
+            Log.Error("VDM.DisconnectClient \"{guid}\" failed", guid);
+            return;
+        }
+        this.DisconnectClient(client?.Ticket ?? new Ticket(-1));
     }
 
     public void ReleaseModifiers(ModifierKeys modifiers)
@@ -228,4 +239,6 @@ internal class BaseDesktopManager : IExtendedDesktopManager
             DisconnectClient(client.Ticket); // ~ remoteClient.Remove
         });
     }
+
+
 }

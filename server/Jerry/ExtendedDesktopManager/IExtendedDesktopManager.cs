@@ -1,4 +1,5 @@
-﻿using Jerry.ExtendedDesktopManager;
+﻿using Jerry.Controllable;
+using Jerry.ExtendedDesktopManager;
 using Jerry.Hotkey;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,10 @@ public interface IGlobalHotkeyHandler
 
 public interface IClientManager
 {
-    void RegisterClient(ConnectedClient proxy);
+    void RegisterClient(ConnectedClient client);
 
     void DisconnectClient(Ticket id);
+    void DisconnectClient(Guid guid);
 
     Task<bool> TrySendHeartbeatAsync(Ticket id);
 
