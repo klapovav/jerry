@@ -16,7 +16,7 @@ namespace Jerry.Controllable;
 public class Client : IControllableComputer
 {
     private readonly CommunicationLayer comLayer;
-    private readonly ClientValidInfo clientInfo;
+    private readonly ClientInfo clientInfo;
     private readonly ScreenSimple primaryMonitor;
     private readonly Stopwatch lastMoveSend = new();
     private bool relativeMove = true;
@@ -29,7 +29,7 @@ public class Client : IControllableComputer
     private const ushort MAX_POLLING_RATE = 125; 
     private const double groupingInterval = 1000.0 / MAX_POLLING_RATE;
 
-    public Client(CommunicationLayer layer, Ticket sessionID, ClientValidInfo info)
+    public Client(CommunicationLayer layer, Ticket sessionID, ClientInfo info)
     {
         comLayer = layer;
         clientInfo = info;

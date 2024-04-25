@@ -25,7 +25,7 @@ public struct HandshakeResult
     /// Contains parameters of the client that has been successfully accepted by the server.
     /// If <see cref="Succeeded"/> is false, this field is null.
     /// </summary>
-    public ClientValidInfo? RepairedInfo;
+    public ClientInfo? RepairedInfo;
 
     public HandshakeResult(Rejection rejectionType)
     {
@@ -35,7 +35,7 @@ public struct HandshakeResult
         RepairedInfo = null;
     }
 
-    public HandshakeResult(ClientValidInfo info, FixableIssue warning)
+    public HandshakeResult(ClientInfo info, FixableIssue warning)
     {
         Succeeded = true;
         RejectionType = Rejection.None;
