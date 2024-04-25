@@ -1,9 +1,9 @@
 using Jerry.Connection.Security;
+using Jerry.Coordinates;
+using Jerry.Extensions;
 using Master;
 using Serilog;
-using Slave;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,9 +18,8 @@ public class Gatekeeper : IDisposable
     private readonly Guid serverID;
     private readonly IClientManager virtualDesktopManager;
     private readonly KeyExchange keyExchange;
-    private readonly ConcurrentDictionary<Guid, Ticket> clients;
     private int handshakeCount = 0;
-    private Task<IEnumerable<Guid>>? updateClientsTask;
+    private Task<IEnumerable<Guid>>? clients;
 
     public Gatekeeper(string password, Guid localId, IClientManager virtualDesk)
     {
@@ -28,7 +27,6 @@ public class Gatekeeper : IDisposable
         serverID = localId;
         virtualDesktopManager = virtualDesk;
         keyExchange = new();
-        clients = new ConcurrentDictionary<Guid, Ticket>();
     }
 
     public HandshakeResult HandleIncomingConnection(Socket socket)
@@ -76,82 +74,95 @@ public class Gatekeeper : IDisposable
         return result;
 
     }
+   
+    private void InitiateDataUpdate() => clients = virtualDesktopManager.GetConnectedClientsAsync();
 
-    private void InitiateDataUpdate() => updateClientsTask = virtualDesktopManager.GetConnectedClientsAsync();
 
+    private IEnumerable<Guid> CompleteDataUpdate() => clients?.Result ?? Enumerable.Empty<Guid>();
 
-    private void CompleteDataUpdate()
-    {
-        var keysToInclude = updateClientsTask?.Result ?? Enumerable.Empty<Guid>();
-        var keysToRemove = clients.Keys.Except(keysToInclude).ToList();
-        foreach (var key in keysToRemove)
-            clients.Remove(key, out _);
-    }
-
-    public HandshakeResult Handshake(CommunicationLayer layer, out ConnectedClient client)
+    private HandshakeResult Handshake(CommunicationLayer layer, out ConnectedClient client)
     {
         client = default;
         //init info exchange
-        if (!layer.TryGetRequest(Request.InitInfo, out var received))
+        var responded = layer.TryGetRequest(Request.InitInfo, out var rec);
+        if (!responded || rec is null)
         {
             return new HandshakeResult(Rejection.InitialInfoMissing);
         }
-
+        var received = rec.InitInfo;
         //init info validation
-        Log.Information("Incoming message: {@ClientInfo}", received.InitInfo);
-        var validationResult = ValidateInitInfo(received.InitInfo);
-
-        if (validationResult.Succeeded)
-        {
-            handshakeCount++;
-            var newInitInfo = validationResult.RepairedInfo!;
-            client = new ConnectedClient(layer, new Ticket(handshakeCount), newInitInfo);
-            if (!clients.TryAdd(client.Info.Guid, client.ID))
-            {
-                return new HandshakeResult(Rejection.Unknown);
-            }
-            
-        }
-
-        return validationResult;
-    }
-
-    private HandshakeResult ValidateInitInfo(ClientInfo received)
-    {
-        if (received is null)
-        {
-            Log.Warning("Client failed to send initial handshake data");
-            return new HandshakeResult(Rejection.InitialInfoMissing);
-        }
+        Log.Information("Incoming message: {@ClientInfo}", received);
         if (received.Password != correctPassword)
         {
             Log.Debug("Wrong password; expected '{Exp}' - received '{Received}' ", correctPassword, received.Password);
             return new HandshakeResult(Rejection.WrongPassword);
         }
-
         if (received.Width < 1 || received.Height < 1)
         {
             return new HandshakeResult(Rejection.UnexpectedResolution);
         }
-        CompleteDataUpdate();
-        var ValidInfo = new ClientValidInfo(received!, clients, serverID);
 
-        return new HandshakeResult(ValidInfo, ValidInfo.Warning);
+        handshakeCount++;
+        var clients = CompleteDataUpdate();
+        var (issues,validInfo) = DataCorrection(received!, clients.Append(serverID));
+        var validationResult = new HandshakeResult(validInfo, issues);
+        client = new ConnectedClient(layer, new Ticket(handshakeCount), validInfo);
+        return validationResult;
+    }
+
+    private (FixableIssue, ClientInfo) DataCorrection(Slave.ClientInfo original, IEnumerable<Guid> connected)
+    {
+
+        ArgumentNullException.ThrowIfNull(original, nameof(original));
+        var warning = FixableIssue.None;
+        
+
+        if (!Guid.TryParse(original.Guid.Value, out Guid candidate))
+        {
+            warning = warning.Add(FixableIssue.GuidInvalid);
+            candidate = GenerateUniqueGuid(connected);
+        }
+        else if (connected.Contains(candidate))
+        {
+            warning = warning.Add(FixableIssue.GuidAlreadyUsed);
+            candidate = GenerateUniqueGuid(connected);
+        }
+
+        var x = original.Cursor?.X ?? original.Width / 2;
+        var y = original.Cursor?.Y ?? original.Height / 2;
+        y = Math.Min(Math.Max(0, y), original.Height - 1);
+        x = Math.Min(Math.Max(0, x), original.Width - 1);
+
+        if (y != original.Cursor?.Y || x != original.Cursor?.X)
+        {
+            warning = warning.Add(FixableIssue.MousePositionOutOfBounds);
+        }
+
+        return (warning, new ClientInfo(original, candidate, new LocalCoordinate(x, y)));
+       
+    }
+    private static Guid GenerateUniqueGuid(IEnumerable<Guid> used)
+    {
+        var guid = Guid.NewGuid();
+        while (used.Contains(guid))
+        {
+            guid = Guid.NewGuid();
+        }
+        return guid;
     }
 
     public void DisconnectAll()
     {
         InitiateDataUpdate();
-        CompleteDataUpdate();
+        var clients = CompleteDataUpdate();
         foreach (var client in clients)
         {
-            virtualDesktopManager.DisconnectClient(client.Value);
+            virtualDesktopManager.DisconnectClient(client);
         }
     }
 
     public void Dispose()
     {
         DisconnectAll();
-        clients.Clear();
     }
 }
