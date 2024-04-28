@@ -21,13 +21,13 @@ public class Client : IControllableComputer
     private readonly Stopwatch lastMoveSend = new();
     private bool relativeMove = true;
     private Vector groupedMove = Vector.Empty;
-    //FEAT 
+    // FEAT 
     // 1. configuration
     // 2. debug hotkey
     // 3. dynamic adaptation (LAN)
-    // 4. dynamic adatpation (client processing capability)
+    // 4. dynamic adaptation (client processing capability)
     private const ushort MAX_POLLING_RATE = 125; 
-    private const double groupingInterval = 1000.0 / MAX_POLLING_RATE;
+    private const double GROUPING_INTERVAL = 1000.0 / MAX_POLLING_RATE;
 
     public Client(CommunicationLayer layer, Ticket sessionID, ClientInfo info)
     {
@@ -69,7 +69,7 @@ public class Client : IControllableComputer
 
     private void SendConditionally(int x, int y)
     {
-        if (lastMoveSend.ElapsedMilliseconds > groupingInterval)
+        if (lastMoveSend.ElapsedMilliseconds > GROUPING_INTERVAL)
         {
             comLayer.TrySendMessage(comLayer.Factory.MouseMove(x, y));
             groupedMove = Vector.Empty;
@@ -174,24 +174,25 @@ public class Client : IControllableComputer
         Log.Debug("Release modifiers: {mod}", modifiers); //scan: (0x){scan:X4}
         if (modifiers.HasFlag(ModifierKeys.Windows))
         {
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.LWin, false));
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.RWin, false));
+            ReleaseKey(Keys.LWin);
+            ReleaseKey(Keys.RWin);
         }
         if (modifiers.HasFlag(ModifierKeys.Control))
         {
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.LControlKey, false));
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.RControlKey, false));
+            ReleaseKey(Keys.LControlKey);
+            ReleaseKey(Keys.RControlKey);
         }
         if (modifiers.HasFlag(ModifierKeys.Alt))
         {
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.LMenu, false));
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.RMenu, false));
+            ReleaseKey(Keys.LMenu);
+            ReleaseKey(Keys.RMenu);
         }
         if (modifiers.HasFlag(ModifierKeys.Shift))
         {
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.LShiftKey, false));
-            comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)Keys.RShiftKey, false));
+            ReleaseKey(Keys.LShiftKey);
+            ReleaseKey(Keys.RShiftKey);
         }
+        void ReleaseKey(Keys key) => comLayer.TrySendMessage(MessageFactory.KeyboardEvent((uint)key, false));
     }
 
     private static uint GetLayoutIndependentKey(Events.KeyboardHookEvent keyEvent)

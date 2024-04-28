@@ -1,4 +1,5 @@
 using Jerry.Connection.Security;
+using Jerry.Controllable;
 using Jerry.Coordinates;
 using Jerry.Extensions;
 using Master;
@@ -19,7 +20,7 @@ public class Gatekeeper : IDisposable
     private readonly IClientManager virtualDesktopManager;
     private readonly KeyExchange keyExchange;
     private int handshakeCount = 0;
-    private Task<IEnumerable<Guid>>? clients;
+    private Task<IEnumerable<IComputer>>? clients;
 
     public Gatekeeper(string password, Guid localId, IClientManager virtualDesk)
     {
@@ -78,7 +79,7 @@ public class Gatekeeper : IDisposable
     private void InitiateDataUpdate() => clients = virtualDesktopManager.GetConnectedClientsAsync();
 
 
-    private IEnumerable<Guid> CompleteDataUpdate() => clients?.Result ?? Enumerable.Empty<Guid>();
+    private IEnumerable<IComputer> CompleteDataUpdate() => clients?.Result ?? Enumerable.Empty<IComputer>();
 
     private HandshakeResult Handshake(CommunicationLayer layer, out ConnectedClient client)
     {
@@ -104,7 +105,8 @@ public class Gatekeeper : IDisposable
 
         handshakeCount++;
         var clients = CompleteDataUpdate();
-        var (issues,validInfo) = DataCorrection(received!, clients.Append(serverID));
+        var used = clients.Select(c => c.ID).Append(serverID);
+        var (issues,validInfo) = DataCorrection(received!, used);
         var validationResult = new HandshakeResult(validInfo, issues);
         client = new ConnectedClient(layer, new Ticket(handshakeCount), validInfo);
         return validationResult;
@@ -155,9 +157,9 @@ public class Gatekeeper : IDisposable
     {
         InitiateDataUpdate();
         var clients = CompleteDataUpdate();
-        foreach (var client in clients)
+        foreach (IComputer client in clients)
         {
-            virtualDesktopManager.DisconnectClient(client);
+            virtualDesktopManager.DisconnectClient(client.Ticket);
         }
     }
 

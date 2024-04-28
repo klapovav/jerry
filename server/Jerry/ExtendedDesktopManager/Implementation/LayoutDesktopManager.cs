@@ -44,12 +44,6 @@ internal class LayoutDesktopManager : BaseDesktopManager
         base.DisconnectClient(disc_id);
     }
 
-    public override void DisconnectClient(Guid disc_id)
-    {
-        // TODO mouse-transition branch
-        throw new NotImplementedException();
-    }
-
     public override void OnMouseEvent(Events.MouseDeltaMove mouseMove)
     {
         var previousCoordinate = ExtDesktopLayout.GetCursorPositionInLayout(Active);

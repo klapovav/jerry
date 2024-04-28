@@ -64,7 +64,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     {
         try
         {
-            if (Active.EqualsTicket(idToDisconnect))
+            if (Active.HasTicket(idToDisconnect))
             {
                 Active = LocalComputer;
             }
@@ -83,17 +83,6 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         {
             Log.Error(ex, "VDM.DisconnectClient() Exception");
         }
-    }
-
-    public virtual void DisconnectClient(Guid guid)
-    {
-        var client = remoteClients.Find(cc => cc.ID == guid);
-        if (client == default)
-        {
-            Log.Error("VDM.DisconnectClient \"{guid}\" failed", guid);
-            return;
-        }
-        this.DisconnectClient(client?.Ticket ?? new Ticket(-1));
     }
 
     public void ReleaseModifiers(ModifierKeys modifiers)
@@ -175,7 +164,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
     {
         var newMon = remoteClients
             .Append(LocalComputer)
-            .Where(s => s.EqualsTicket(monitorID))
+            .Where(s => s.HasTicket(monitorID))
             .FirstOrDefault();
         if (newMon == default(IControllableComputer))
         {
@@ -187,7 +176,7 @@ internal class BaseDesktopManager : IExtendedDesktopManager
 
     private IControllableComputer GetNextScreen()
     {
-        if (!remoteClients.Any())
+        if (remoteClients.Count == 0)
             return LocalComputer;
         var server = Enumerable.Repeat(LocalComputer, 1);
         var newMonitor = server
@@ -216,10 +205,10 @@ internal class BaseDesktopManager : IExtendedDesktopManager
         return Task.FromResult(remoteClients.FirstOrDefault(rm => rm.Ticket == id)?.TrySendHeartbeat() ?? false);
     }
 
-    public Task<IEnumerable<Guid>> GetConnectedClientsAsync()
+    public Task<IEnumerable<IComputer>> GetConnectedClientsAsync()
     {
         UpdateRemoteClients();
-        return Task.FromResult(remoteClients.Select(cl => cl.ID));
+        return Task.FromResult(remoteClients.Select(cl => (IComputer)cl));
     }
 
     public Task<bool> HearbeatAnyClientIsSuccessfulAsync()

@@ -27,7 +27,6 @@ public interface IClientManager
     void RegisterClient(ConnectedClient client);
 
     void DisconnectClient(Ticket id);
-    void DisconnectClient(Guid guid);
 
     Task<bool> TrySendHeartbeatAsync(Ticket id);
 
@@ -36,7 +35,7 @@ public interface IClientManager
     /// of connected clients based on successful heartbeat responses.
     /// </summary>
     /// <returns>The list of responsive clients</returns>
-    Task<IEnumerable<Guid>> GetConnectedClientsAsync();
+    Task<IEnumerable<IComputer>> GetConnectedClientsAsync();
 
     /// <summary>
     /// Sends heartbeat to all connected clients to maintain the connection.

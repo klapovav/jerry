@@ -1,4 +1,5 @@
-﻿using Jerry.Hook;
+﻿using Jerry.Controllable;
+using Jerry.Hook;
 using Jerry.Hotkey;
 using Serilog;
 using System;
@@ -108,21 +109,11 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
         catch (Exception) { }
     }
 
-    public void DisconnectClient(Guid id)
+    public Task<IEnumerable<IComputer>> GetConnectedClientsAsync()
     {
         try
         {
-            var t = new Task(() => Implementation.DisconnectClient(id));
-            _jobs.TryAdd(t, Timeout.Infinite);
-        }
-        catch (Exception) { }
-    }
-
-    public Task<IEnumerable<Guid>> GetConnectedClientsAsync()
-    {
-        try
-        {
-            var tsc = new TaskCompletionSource<IEnumerable<Guid>>();
+            var tsc = new TaskCompletionSource<IEnumerable<IComputer>>();
             var t = new Task(async () =>
             {
                 tsc.SetResult(await Implementation.GetConnectedClientsAsync());
@@ -130,7 +121,7 @@ public sealed class ExtendedDesktopManager : IExtendedDesktopManager
             _jobs.TryAdd(t, Timeout.Infinite);
             return tsc.Task;
         }
-        catch (Exception) { return Task.FromResult(Enumerable.Empty<Guid>()); }
+        catch (Exception) { return Task.FromResult(Enumerable.Empty<IComputer>()); }
     }
 
     public Task<bool> HearbeatAnyClientIsSuccessfulAsync()
